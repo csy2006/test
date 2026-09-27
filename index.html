@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="ticket.css" />
   <link rel="stylesheet" href="profile.css" />
   <link rel="stylesheet" href="palette.css" />
+  <link rel="stylesheet" href="archive.css" />
   <link rel="icon" href="./002.jpg" type="image/x-icon">
   <script>
     (function() {
@@ -73,6 +74,7 @@
     <span class="nav-link" data-page="ticket" data-i18n="navTicket">旅行票根</span>
     <span class="nav-link" data-page="filter" data-i18n="navFilter">创意滤镜</span>
     <span class="nav-link" data-page="palette" data-i18n="navPalette">色卡</span>
+    <span class="nav-link" data-page="archive" data-i18n="navArchive">档案库</span>
     <span class="nav-link" data-page="profile" data-i18n="navProfile">设置中心</span>
   </div>
   <!-- <div class="nav-right">
@@ -341,7 +343,7 @@
             <label class="param-label"><span data-i18n="resultMode">降噪模式</span></label>
             <div class="mode-tabs" id="modeTabs">
               <button class="mode-tab active" data-mode="bilateral" onclick="selectMode(this)"><span data-i18n="modeBilateral">彩色双边</span></button>
-              <button class="mode-tab" data-mode="grayscale_bilateral" onclick="selectMode(this)"><span data-i18n="modeGrayscale">灰度 Y 通道</span></button>
+              <button class="mode-tab" data-mode="grayscale" onclick="selectMode(this)"><span data-i18n="modeGrayscale">灰度 Y 通道</span></button>
               <div class="mode-pill" id="modePill"></div>
             </div>
           </div>
@@ -453,6 +455,7 @@
                 <div class="save-action-pill"></div>
               </div>
               <button class="save-confirm-btn" id="saveConfirmBtn" onclick="executeSaveAction()"><span data-i18n="btnConfirm">确定</span></button>
+              <button class="btn btn-ghost archive-save-btn" id="archiveResultBtn" onclick="archiveCurrentResult()"><span data-i18n="archSaveToArchive">存入档案库</span></button>
             </div>
           </section>
         </div>
@@ -743,6 +746,7 @@
         <div class="filter-editor-actions">
           <button class="btn btn-primary" onclick="downloadFilterResult()" data-i18n="btnSave">保存图片</button>
           <button class="btn btn-secondary" onclick="resetFilterAll()" data-i18n="btnReupload">重新上传</button>
+          <button class="btn btn-secondary" onclick="archiveFromFilter()" data-i18n="archSaveToArchive">存入档案库</button>
         </div>
       </div>
     </div>
@@ -780,6 +784,83 @@
   <!-- 移动端：底部弹窗遮罩 -->
   <div class="filter-mobile-backdrop" id="filterMobileBackdrop"></div>
 </section><!-- end #page-filter -->
+
+<!-- 9: 图片档案库 -->
+<section class="page-section" id="page-archive" data-page="archive">
+  <main class="page-main archive-main">
+
+    <div class="archive-header">
+      <div>
+        <h2 class="archive-title" data-i18n="archTitle">图片档案库</h2>
+        <p class="archive-subtitle" data-i18n="archSubtitle">管理你处理过的所有图片，全部保存在本机浏览器中</p>
+      </div>
+      <div class="archive-header-actions">
+        <span class="archive-storage" id="archiveStorage"></span>
+        <button class="btn btn-ghost" id="archiveImportBtn" data-i18n="archImport">导入图片</button>
+        <button class="btn btn-ghost archive-danger" id="archiveClearBtn" data-i18n="archClearAll">清空档案库</button>
+        <input type="file" id="archiveFileInput" accept="image/*" multiple hidden />
+      </div>
+    </div>
+
+    <div class="archive-toolbar glass-card">
+      <input type="text" class="archive-search" id="archiveSearch" data-i18n-placeholder="archSearchPlaceholder" placeholder="搜索文件名…" />
+      <div class="archive-tabs" id="archiveSourceTabs">
+        <button class="archive-tab active" data-source="all" data-i18n="archAll">全部</button>
+        <button class="archive-tab" data-source="denoise" data-i18n="archSrcDenoise">降噪</button>
+        <button class="archive-tab" data-source="filter" data-i18n="archSrcFilter">滤镜</button>
+        <button class="archive-tab" data-source="import" data-i18n="archSrcImport">导入</button>
+        <div class="archive-tab-pill" id="archiveTabPill"></div>
+      </div>
+      <button class="archive-fav-toggle" id="archiveFavToggle" title="只看收藏">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      </button>
+      <select class="archive-sort" id="archiveSort">
+        <option value="time" data-i18n="archSortTime">按时间</option>
+        <option value="name" data-i18n="archSortName">按名称</option>
+        <option value="size" data-i18n="archSortSize">按大小</option>
+      </select>
+    </div>
+
+    <div class="archive-empty glass-card" id="archiveEmpty">
+      <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+      </svg>
+      <p class="archive-empty-title" data-i18n="archEmpty">暂无归档图片</p>
+      <p class="archive-empty-hint" data-i18n="archEmptyHint">在降噪结果页或滤镜页点击「存入档案库」，或在此导入本地图片</p>
+    </div>
+
+    <div class="archive-grid" id="archiveGrid"></div>
+
+  </main>
+
+  <!-- 预览弹窗 -->
+  <div class="archive-modal-backdrop" id="archiveModalBackdrop">
+    <div class="archive-modal" id="archiveModal">
+      <button class="archive-modal-close" id="archiveModalClose" aria-label="关闭">&times;</button>
+      <div class="archive-modal-img-wrap"><img id="archiveModalImg" alt="preview" /></div>
+      <div class="archive-modal-side">
+        <h3 class="archive-modal-name" id="archiveModalName">--</h3>
+        <div class="archive-modal-meta">
+          <div class="archive-meta-row"><span data-i18n="archDetailSource">来源</span><em id="archiveModalSource">--</em></div>
+          <div class="archive-meta-row"><span data-i18n="archDetailSize">尺寸</span><em id="archiveModalDims">--</em></div>
+          <div class="archive-meta-row"><span data-i18n="archDetailBytes">大小</span><em id="archiveModalBytes">--</em></div>
+          <div class="archive-meta-row"><span data-i18n="archDetailDate">归档时间</span><em id="archiveModalDate">--</em></div>
+        </div>
+        <div class="archive-modal-tags">
+          <label data-i18n="archTags">标签</label>
+        <input type="text" id="archiveModalTags" data-i18n-placeholder="archTagsPlaceholder" placeholder="用逗号分隔" />
+        </div>
+        <div class="archive-modal-actions">
+          <button class="btn btn-primary" id="archiveModalDownload" data-i18n="archDownload">下载</button>
+          <button class="btn btn-ghost" id="archiveModalFav" data-i18n="archFavBtn">收藏</button>
+          <button class="btn btn-ghost archive-danger" id="archiveModalDelete" data-i18n="archDelete">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="archive-drop-hint" id="archiveDropHint">松开鼠标，导入图片</div>
+</section>
 
 <!-- 8: 设置中心 -->
 <section class="page-section" id="page-profile" data-page="profile">
@@ -1001,5 +1082,6 @@
 <script src="filter.js"></script>
 <script src="profile.js"></script>
 <script src="palette.js"></script>
+<script src="archive.js"></script>
 </body>
 </html>

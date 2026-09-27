@@ -66,7 +66,10 @@
 
     item.addEventListener('click', function () {
       if (typeof vibrate === 'function') vibrate(8);
-      var current = document.documentElement.getAttribute('data-theme') || 'light';
+      // 复用 main.js 的统一判断（自动跟随系统时 data-theme 可能未设置）
+      var current = (typeof getCurrentTheme === 'function')
+        ? getCurrentTheme()
+        : (document.documentElement.getAttribute('data-theme') || 'light');
       var next = current === 'dark' ? 'light' : 'dark';
 
       // 调用 main.js 的 setTheme（含扫幕动画，500ms 后才更新 data-theme）

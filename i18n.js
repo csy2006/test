@@ -240,7 +240,45 @@ var i18n = (function () {
 
     /* 对比浮层 */
     compareOriginal:    { zh: '原图',   en: 'Original' },
-    compareResult:      { zh: '降噪后', en: 'Denoised' }
+    compareResult:      { zh: '降噪后', en: 'Denoised' },
+
+    /* 图片档案库 */
+    navArchive:         { zh: '档案库', en: 'Archive' },
+    archTitle:          { zh: '图片档案库', en: 'Image Archive' },
+    archSubtitle:       { zh: '管理你处理过的所有图片，全部保存在本机浏览器中', en: 'Manage all your processed images, stored locally in your browser' },
+    archImport:         { zh: '导入图片', en: 'Import' },
+    archClearAll:       { zh: '清空档案库', en: 'Clear All' },
+    archSearchPlaceholder: { zh: '搜索文件名…', en: 'Search by name…' },
+    archAll:            { zh: '全部', en: 'All' },
+    archSrcDenoise:     { zh: '降噪', en: 'Denoise' },
+    archSrcFilter:      { zh: '滤镜', en: 'Filter' },
+    archSrcImport:      { zh: '导入', en: 'Imported' },
+    archSortTime:       { zh: '按时间', en: 'By time' },
+    archSortName:       { zh: '按名称', en: 'By name' },
+    archSortSize:       { zh: '按大小', en: 'By size' },
+    archEmpty:          { zh: '暂无归档图片', en: 'No archived images yet' },
+    archEmptyHint:      { zh: '在降噪结果页或滤镜页点击「存入档案库」，或在此导入本地图片', en: 'Save from the result pages or import local images here' },
+    archSaveToArchive:  { zh: '存入档案库', en: 'Save to Archive' },
+    archDetailSource:   { zh: '来源', en: 'Source' },
+    archDetailSize:     { zh: '尺寸', en: 'Dimensions' },
+    archDetailBytes:    { zh: '大小', en: 'File size' },
+    archDetailDate:     { zh: '归档时间', en: 'Archived at' },
+    archTags:           { zh: '标签', en: 'Tags' },
+    archTagsPlaceholder:{ zh: '用逗号分隔', en: 'Comma separated' },
+    archDownload:       { zh: '下载', en: 'Download' },
+    archFavBtn:         { zh: '收藏', en: 'Favorite' },
+    archFavBtnOn:       { zh: '取消收藏', en: 'Unfavorite' },
+    archDelete:         { zh: '删除', en: 'Delete' },
+    archFavOnly:        { zh: '只看收藏', en: 'Favorites only' },
+    archSaved:          { zh: '已存入档案库', en: 'Saved to archive' },
+    archSavedCount:     { zh: '成功存入', en: 'Saved' },
+    archItems:          { zh: '张图片', en: 'images' },
+    archDeleted:        { zh: '已删除', en: 'Deleted' },
+    archCleared:        { zh: '档案库已清空', en: 'Archive cleared' },
+    archConfirmClear:   { zh: '确定要清空档案库中的所有图片吗？', en: 'Clear ALL archived images?' },
+    archConfirmDelete:  { zh: '确定要删除这张图片吗？', en: 'Delete this image?' },
+    archSaveEmpty:      { zh: '当前没有可存入的结果', en: 'Nothing to archive yet' },
+    archTagsSaved:      { zh: '标签已保存', en: 'Tags saved' }
   };
 
 
@@ -293,6 +331,13 @@ var i18n = (function () {
           el.textContent = text;
         }
       }
+    }
+
+    // placeholder 翻译（data-i18n-placeholder 属性）
+    var phEls = document.querySelectorAll('[data-i18n-placeholder]');
+    for (var p = 0; p < phEls.length; p++) {
+      var phEntry = dict[phEls[p].getAttribute('data-i18n-placeholder')];
+      if (phEntry) phEls[p].setAttribute('placeholder', phEntry[lang] || phEntry.zh || '');
     }
 
     // 更新 html lang 属性

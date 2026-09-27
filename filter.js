@@ -941,4 +941,10 @@
   document.addEventListener('DOMContentLoaded', function() {
     initFilterSheetDrag();
   });
+
+  /* 供档案库读取当前滤镜结果 */
+  window.PrismDenFilterBridge = {
+    getCanvas: function () { return _fCanvas; },
+    getActiveFilter: function () { return _fActiveFilter; }
+  };
 })();

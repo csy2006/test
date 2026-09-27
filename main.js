@@ -361,17 +361,42 @@ function initSoundSystem() {
 }
 
 // 主题切换器
+/* 获取当前实际生效的主题：
+ * 自动跟随系统时 data-theme 可能未设置，此时需回退到系统偏好判断，
+ * 否则「系统深色 + 点浅色」会被误判为同主题而直接 return，导致切不走 */
+function getCurrentTheme() {
+  var attr = document.documentElement.getAttribute('data-theme');
+  if (attr) return attr;
+  var saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (e) {}
+  if (saved) return saved;
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+  } catch (e) {}
+  return 'light';
+}
+window.PrismDenGetTheme = getCurrentTheme;
+
 function setTheme(theme) {
-  var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  var currentTheme = getCurrentTheme();
   if (theme === currentTheme) {
     // 同主题只更新 UI 状态，不播放动画
+    // 但仍属「用户手动选择」：必须落盘并清除自动标记，
+    // 否则系统主题一变化就会把用户的选择覆盖掉
+    try {
+      localStorage.setItem('theme', theme);
+      sessionStorage.removeItem('_themeAuto');
+    } catch (e) {}
     _applyThemeUI(theme);
     return;
   }
 
   // 手动切换主题：写入 localStorage，清除自动检测标记
-  localStorage.setItem('theme', theme);
-  sessionStorage.removeItem('_themeAuto');
+  // 无痕模式 / 微信等环境下 localStorage 可能不可写，此处失败不能中断切换
+  try {
+    localStorage.setItem('theme', theme);
+    sessionStorage.removeItem('_themeAuto');
+  } catch (e) {}
 
   // 新主题背景色（与 [data-theme="dark"] 中的 --warm-white 一致）
   var newBg = (theme === 'dark') ? '#1A1612' : '#FDF8F4';
@@ -426,7 +451,7 @@ function setTheme(theme) {
 /* 内部：切换 data-theme + 更新 UI 状态 */
 function _applyThemeUI(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
+  try { localStorage.setItem('theme', theme); } catch (e) {}
 
   const options = document.querySelectorAll('.theme-option');
   options.forEach(opt => {
@@ -759,7 +784,7 @@ window.addEventListener('load', function() {
 });
 
 // 页面切换 (SPA)
-const NAV_ORDER = ['home', 'features', 'guide', 'upload', 'result', 'ticket', 'filter', 'palette', 'profile'];
+const NAV_ORDER = ['home', 'features', 'guide', 'upload', 'result', 'ticket', 'filter', 'palette', 'archive', 'profile'];
 
 let _switchTimer = null;
 let _prevSection = null;
@@ -994,7 +1019,8 @@ function switchPage(page) {
 
   // 移动端：每次页面切换后确保面板/遮罩在 body 下
   // 防止 navigateTo → closeSheet 把面板移回 section 后，下次进入布局错乱
-  movePanelsToBodyIfMobile();
+  // 注意：该函数定义在 DOMContentLoaded 闭包内，只能经 window 句柄调用
+  if (window._movePanelsToBodyIfMobile) window._movePanelsToBodyIfMobile();
 
   // 进入创意滤镜页时，确保弹窗为关闭态（只显示预览区+浮动按钮）
   if (page === 'filter') {
@@ -1012,6 +1038,11 @@ function switchPage(page) {
   }
   if (_prevPage === 'profile' && page !== 'profile' && typeof window.onProfilePageLeave === 'function') {
     window.onProfilePageLeave();
+  }
+
+  // 档案库页面进入回调（每次进入刷新列表）
+  if (page === 'archive' && typeof window.onArchivePageEnter === 'function') {
+    window.onArchivePageEnter();
   }
 }
 
