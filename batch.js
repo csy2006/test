@@ -14,6 +14,7 @@
   var paused = false;      // 是否暂停（当前任务完成后停）
   var cancelFlag = false;  // 是否取消
   var seq = 0;
+  var _abortWaiters = [];  // 取消时唤醒等待中的处理 Promise
 
   var el = {};             // DOM 缓存
 
@@ -248,13 +249,57 @@
       sigmaR: parseInt(el.sigmaR.value, 10),
       mode: (document.querySelector('input[name="batchMode"]:checked') || {}).value || 'bilateral',
       format: el.format.value,
-      quality: parseInt(el.quality.value, 10) / 100
+      quality: parseInt(el.quality.value, 10) / 100,
+      maxPixels: parseInt(el.maxPixels.value, 10),      // 0 = 不限制
+      timeoutSec: parseInt(el.timeout.value, 10)        // 单张超时秒数，0 = 不限
     };
+  }
+
+  /**
+   * 大图保护：像素数超过上限时等比缩小。
+   * 降噪耗时随像素数线性增长，手机原图（1200 万像素）单张可达数十秒，
+   * 不设上限时批量队列会长时间无响应。
+   */
+  function limitSize(canvas, maxPixels) {
+    var px = canvas.width * canvas.height;
+    if (!maxPixels || px <= maxPixels) return { canvas: canvas, scaled: false, scale: 1 };
+
+    var scale = Math.sqrt(maxPixels / px);
+    var w = Math.max(1, Math.round(canvas.width * scale));
+    var h = Math.max(1, Math.round(canvas.height * scale));
+    var small = document.createElement('canvas');
+    small.width = w;
+    small.height = h;
+    var ctx = small.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(canvas, 0, 0, w, h);
+    return { canvas: small, scaled: true, scale: scale };
   }
 
   function processOne(t, params) {
     return new Promise(function (resolve) {
       var started = performance.now();
+      var tickTimer = null;
+
+      // 秒级计时：分块之间进度不跳，靠这个让用户知道还在算
+      function startTick() {
+        stopTick();
+        tickTimer = setInterval(function () {
+          t.elapsed = Math.round(performance.now() - started);
+          var node = el.list.querySelector('[data-id="' + t.id + '"]');
+          if (node) {
+            var meta = node.querySelector('.batch-task-meta');
+            if (meta) {
+              var timeSpan = meta.querySelector('.batch-task-time');
+              if (timeSpan) timeSpan.textContent = fmtTime(t.elapsed);
+            }
+          }
+        }, 1000);
+      }
+      function stopTick() {
+        if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+      }
 
       loadImage(t.file).then(function (img) {
         var srcCanvas = document.createElement('canvas');
@@ -263,13 +308,25 @@
         srcCanvas.getContext('2d').drawImage(img, 0, 0);
 
         t.thumb = makeThumb(img);
-        t.width = img.naturalWidth;
-        t.height = img.naturalHeight;
+        t.srcWidth = img.naturalWidth;
+        t.srcHeight = img.naturalHeight;
         render();
 
         if (!window.PrismDenDenoise) throw new Error('降噪核心未就绪');
 
-        return window.PrismDenDenoise.run(srcCanvas, {
+        // 大图保护：超过上限先等比缩小
+        var limited = limitSize(srcCanvas, params.maxPixels);
+        t.width = limited.canvas.width;
+        t.height = limited.canvas.height;
+        t.scaled = limited.scaled;
+        if (limited.scaled) {
+          t.note = '原图 ' + t.srcWidth + '×' + t.srcHeight + '，已缩至上限内';
+          render();
+        }
+
+        startTick();
+
+        var runPromise = window.PrismDenDenoise.run(limited.canvas, {
           sigmaS: params.sigmaS,
           sigmaR: params.sigmaR,
           mode: params.mode,
@@ -278,7 +335,28 @@
             updateTaskNode(t);
           }
         });
+
+        // 单张超时保护：超时则中止 worker，避免无限等待
+        var timed = runPromise;
+        if (params.timeoutSec) {
+          timed = new Promise(function (res, rej) {
+            var timer = setTimeout(function () {
+              if (window.PrismDenDenoise && window.PrismDenDenoise.abort) {
+                window.PrismDenDenoise.abort();
+              }
+              rej(new Error('单张超过 ' + params.timeoutSec + ' 秒未完，已跳过'));
+            }, params.timeoutSec * 1000);
+            runPromise.then(function (v) { clearTimeout(timer); res(v); },
+                            function (e) { clearTimeout(timer); rej(e); });
+          });
+        }
+
+        // 取消信号：worker 被硬终止后，等待中的 Promise 需要被叫醒，否则队列永久挂起
+        var aborted = new Promise(function (res, rej) { _abortWaiters.push(rej); });
+
+        return Promise.race([timed, aborted]);
       }).then(function (outCanvas) {
+        stopTick();
         var mime = params.format === 'jpeg' ? 'image/jpeg'
           : params.format === 'webp' ? 'image/webp' : 'image/png';
         var ext = params.format === 'jpeg' ? 'jpg' : params.format;
@@ -299,8 +377,11 @@
             window.PrismDenLog.add({
               type: 'batch',
               name: t.name,
-              params: { sigmaS: params.sigmaS, sigmaR: params.sigmaR, mode: params.mode, format: params.format },
-              width: t.width, height: t.height,
+            params: {
+              sigmaS: params.sigmaS, sigmaR: params.sigmaR, mode: params.mode, format: params.format,
+              缩放: t.scaled ? ('是（原 ' + t.srcWidth + '×' + t.srcHeight + '）') : '否'
+            },
+            width: t.width, height: t.height,
               elapsed: t.elapsed,
               status: 'success',
               thumb: t.thumb
@@ -318,6 +399,7 @@
           resolve();
         });
       }).catch(function (err) {
+        stopTick();
         t.status = 'error';
         t.error = err && err.message ? err.message : String(err);
         t.elapsed = Math.round(performance.now() - started);
@@ -359,6 +441,7 @@
       t.status = 'running';
       t.error = '';
       t.progress = 0;
+      setQueueInfo('正在处理第 ' + (i + 1) + '/' + tasks.length + ' 张：' + t.name);
       render();
 
       await processOne(t, params);
@@ -366,6 +449,8 @@
       render();
       updateSummary();
     }
+
+    setQueueInfo('');
 
     running = false;
     syncButtons();
@@ -390,6 +475,13 @@
     if (!running) return;
     cancelFlag = true;
     paused = false;
+    // 硬中断：终止 worker，避免还要等当前分块算完
+    if (window.PrismDenDenoise && window.PrismDenDenoise.abort) {
+      window.PrismDenDenoise.abort();
+    }
+    // 叫醒正在等待的处理 Promise，否则队列会永久挂起
+    _abortWaiters.forEach(function (rej) { rej(new Error('已取消')); });
+    _abortWaiters = [];
     syncButtons();
   }
 
@@ -459,8 +551,9 @@
             '<span class="batch-task-status">' + STATUS_TEXT[t.status] +
               (t.status === 'running' && t.progress ? ' ' + t.progress + '%' : '') + '</span>' +
             '<span>' + fmtBytes(t.size) + '</span>' +
-            (t.width ? '<span>' + t.width + '×' + t.height + '</span>' : '') +
-            (t.elapsed ? '<span>' + fmtTime(t.elapsed) + '</span>' : '') +
+            (t.width ? '<span>' + t.width + '×' + t.height + (t.scaled ? '（已缩放）' : '') + '</span>' : '') +
+            '<span class="batch-task-time">' + fmtTime(t.elapsed) + '</span>' +
+            (t.note ? '<span>' + t.note + '</span>' : '') +
             (t.error ? '<span class="batch-task-err">' + t.error + '</span>' : '') +
           '</div>' +
           '<div class="batch-task-bar"><div class="batch-task-bar-fill" style="width:' + t.progress + '%"></div></div>' +
@@ -506,6 +599,10 @@
     if (el.overallBar) el.overallBar.style.width = pct + '%';
   }
 
+  function setQueueInfo(text) {
+    if (el.queueInfo) el.queueInfo.textContent = text || '';
+  }
+
   function syncButtons() {
     if (el.btnStart) el.btnStart.disabled = running;
     if (el.btnPause) el.btnPause.disabled = !running;
@@ -547,6 +644,9 @@
       quality: document.getElementById('batchQuality'),
       qualityRow: document.getElementById('batchQualityRow'),
       saveArchive: document.getElementById('batchSaveArchive'),
+      maxPixels: document.getElementById('batchMaxPixels'),
+      timeout: document.getElementById('batchTimeout'),
+      queueInfo: document.getElementById('batchQueueInfo'),
       btnStart: document.getElementById('batchStartBtn'),
       btnPause: document.getElementById('batchPauseBtn'),
       btnCancel: document.getElementById('batchCancelBtn'),

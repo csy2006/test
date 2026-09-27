@@ -1982,9 +1982,28 @@ async function denoiseCanvas(srcCanvas, opts) {
   return outCanvas;
 }
 
+/**
+ * 中止正在进行的降噪：直接终止 worker 并释放 Blob URL。
+ * 用于批量处理的「取消」与「单张超时」——否则必须等当前分块算完才能响应。
+ * 终止后再次调用 getDenoiseWorker() 会自动重建，不影响后续任务。
+ */
+function abortDenoise() {
+  if (_denoiseWorker) {
+    try { _denoiseWorker.terminate(); } catch (e) { /* 已终止则忽略 */ }
+    _denoiseWorker = null;
+  }
+  if (_denoiseWorkerBlobURL) {
+    try { URL.revokeObjectURL(_denoiseWorkerBlobURL); } catch (e) { /* 忽略 */ }
+    _denoiseWorkerBlobURL = null;
+  }
+  // 消息号递增，让仍在等待中的旧 Promise 收不到匹配响应而自然作废
+  _denoiseMsgId++;
+}
+
 // 对外暴露，供批量处理等模块复用同一套算法
 window.PrismDenDenoise = {
   run: denoiseCanvas,
+  abort: abortDenoise,
   tileInfo: function (w, h) {
     const TILE = 1800;
     return Math.ceil(w / TILE) * Math.ceil(h / TILE);

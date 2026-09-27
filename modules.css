@@ -159,6 +159,16 @@
   transition: width 0.3s ease;
 }
 
+.batch-queue-info {
+  min-height: 1.1rem;
+  font-size: 0.8rem;
+  color: var(--orange, #c4683a);
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .batch-summary {
   display: flex;
   flex-wrap: wrap;

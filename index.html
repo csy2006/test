@@ -577,14 +577,36 @@
           <input type="range" id="batchQuality" min="50" max="100" value="92" />
         </div>
         <div class="mod-field">
+          <label>单张像素上限</label>
+          <select id="batchMaxPixels">
+            <option value="4000000">400 万（最快）</option>
+            <option value="8000000" selected>800 万（推荐）</option>
+            <option value="12000000">1200 万</option>
+            <option value="0">不限制（大图会很慢）</option>
+          </select>
+        </div>
+        <div class="mod-field">
+          <label>单张超时</label>
+          <select id="batchTimeout">
+            <option value="30">30 秒</option>
+            <option value="60" selected>60 秒</option>
+            <option value="180">180 秒</option>
+            <option value="0">不限制</option>
+          </select>
+        </div>
+        <div class="mod-field">
           <label class="batch-radio" style="padding-bottom:0.5rem;">
             <input type="checkbox" id="batchSaveArchive" /> 完成后自动存入档案库
           </label>
         </div>
       </div>
+      <p style="margin:0.7rem 0 0; font-size:0.76rem; color:var(--stone); line-height:1.6;">
+        超过像素上限的图片会先等比缩小再降噪，避免单张耗时过久；超时未完成的会自动跳过并标记为失败，不拖住后面的图片。
+      </p>
     </div>
 
     <div class="batch-overall"><div class="batch-overall-fill" id="batchOverallBar"></div></div>
+    <div class="batch-queue-info" id="batchQueueInfo"></div>
 
     <div class="batch-summary" id="batchSummary"></div>
 
