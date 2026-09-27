@@ -1011,6 +1011,11 @@ function switchPage(page) {
     window.onProfilePageLeave();
   }
 
+  // 处理日志页面进入回调（每次进入刷新列表）
+  if (page === 'history' && typeof window.onHistoryPageEnter === 'function') {
+    window.onHistoryPageEnter();
+  }
+
   // 档案库页面进入回调（每次进入刷新列表）
   if (page === 'archive' && typeof window.onArchivePageEnter === 'function') {
     window.onArchivePageEnter();

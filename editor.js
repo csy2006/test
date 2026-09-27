@@ -187,7 +187,8 @@
   /* ────────── 渲染流程 ────────── */
 
   function render() {
-    if (!srcCanvas || !workCanvas || !params) return;
+    // 注意：workCanvas 由本函数产出，首次调用时必然为 null，不能作为前置条件
+    if (!srcCanvas || !params) return;
 
     var started = performance.now();
 
