@@ -517,6 +517,14 @@
     elDropHint = document.getElementById('archiveDropHint');
 
     if (!elGrid || !elModalBackdrop) return;
+
+    // 预览弹窗移到 body 下：.page-section 是 position:absolute + z-index:0，
+    // 会创建独立层叠上下文，把弹窗的 z-index:2000 困在里面，
+    // 导致固定导航栏（根上下文 z-index:1000）在手机端盖住弹窗卡片顶部
+    if (elModalBackdrop.parentElement !== document.body) {
+      document.body.appendChild(elModalBackdrop);
+    }
+
     bindEvents();
     refresh();
   }
