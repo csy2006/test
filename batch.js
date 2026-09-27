@@ -400,8 +400,9 @@
         });
       }).catch(function (err) {
         stopTick();
-        t.status = 'error';
-        t.error = err && err.message ? err.message : String(err);
+        var msg = err && err.message ? err.message : String(err);
+        t.status = /已取消/.test(msg) ? 'cancelled' : 'error';
+        t.error = msg;
         t.elapsed = Math.round(performance.now() - started);
         if (window.PrismDenLog) {
           window.PrismDenLog.add({
