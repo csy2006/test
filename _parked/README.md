@@ -9,8 +9,11 @@
 | `page-features.html` | 首页导航「核心特性」 | 算法特性介绍区块，原 `index.html` 第 137-168 行 |
 | `page-guide.html` | 首页导航「参数指南」 | σₛ / σᵣ 参数说明区块，原 `index.html` 第 169-237 行 |
 | `page-filter.html` | 首页导航「创意滤镜」 | 胶片模拟滤镜整页，原 `index.html` 第 639-787 行 |
+| `page-palette.html` | 首页导航「色卡」 | 调色盘提取整页，原 `index.html` 第 752-801 行 |
 | `filter.js` | 创意滤镜逻辑 | 滤镜算法与页面交互 |
 | `filter.css` | 创意滤镜样式 | 滤镜页样式 |
+| `palette.js` | 色卡逻辑 | 主色调提取与合成图 |
+| `palette.css` | 色卡样式 | 色卡页样式 |
 
 ## 恢复方法
 
