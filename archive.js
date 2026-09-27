@@ -8,7 +8,7 @@
  * 依赖：main.js 的 showToast / vibrate；i18n.js 的 i18n.t
  * 对外接口：window.PrismDenArchive（save/remove/clear/count）
  *           window.onArchivePageEnter（main.js switchPage 回调）
- *           window.archiveCurrentResult / window.archiveFromFilter（页面入口按钮）
+ *           window.archiveCurrentResult（页面入口按钮）
  */
 
 (function () {
@@ -186,27 +186,8 @@
     } catch (e) { /* 结果对象缺失时静默降级 */ }
   };
 
-  /* 入口二：滤镜页「存入档案库」 */
-  window.archiveFromFilter = function () {
-    var bridge = window.PrismDenFilterBridge;
-    var canvas = bridge && bridge.getCanvas ? bridge.getCanvas() : null;
-    if (!canvas) {
-      if (typeof showToast === 'function') showToast(i18n.t('archSaveEmpty'), 'error');
-      return;
-    }
-    canvas.toBlob(function (blob) {
-      if (!blob) return;
-      var key = bridge.getActiveFilter();
-      saveBlob(blob, {
-        name: 'filtered-' + (key || 'original') + '.jpg',
-        source: 'filter',
-        tags: key ? ['filter', key.toLowerCase()] : ['filter']
-      }).then(function (id) {
-        if (id && typeof showToast === 'function') showToast(i18n.t('archSaved'), 'success');
-        if (typeof vibrate === 'function') vibrate(10);
-      });
-    }, 'image/jpeg', 0.95);
-  };
+  /* 入口二（已下线）：滤镜页「存入档案库」
+     创意滤镜模块归档后此入口停用，恢复方式见 _parked/page-filter.html */
 
   /* 入口三：本页手动导入（支持多选） */
   function importFiles(fileList) {

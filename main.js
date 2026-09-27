@@ -679,8 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 移动端（≤768px）：面板移到 body 下，用 position:fixed 实现底部弹窗
   var _panelsInBody = false;
   var _panelDefs = [
-    { id: 'ticketPanel',         backdropId: 'ticketMobileBackdrop',  pageId: 'page-ticket'  },
-    { id: 'filterPanel',         backdropId: 'filterMobileBackdrop',  pageId: 'page-filter'  }
+    { id: 'ticketPanel',         backdropId: 'ticketMobileBackdrop',  pageId: 'page-ticket'  }
   ];
 
   function movePanelsToBodyIfMobile() {
@@ -784,7 +783,7 @@ window.addEventListener('load', function() {
 });
 
 // 页面切换 (SPA)
-const NAV_ORDER = ['home', 'features', 'guide', 'upload', 'result', 'ticket', 'filter', 'palette', 'archive', 'profile'];
+const NAV_ORDER = ['home', 'upload', 'result', 'ticket', 'palette', 'archive', 'profile'];
 
 let _switchTimer = null;
 let _prevSection = null;
@@ -892,27 +891,7 @@ function switchPage(page) {
     if (es) es.style.visibility = 'hidden';
   }
 
-  // 离开创意滤镜页时，关闭底部弹窗 + 恢复滚动
-  if (currentPage === 'filter') {
-    var fp = document.getElementById('filterPanel');
-    var fb = document.getElementById('filterMobileBackdrop');
-    var ft = document.getElementById('filterMobileToggle');
-    var fpage = document.querySelector('.filter-page');
-    var fsection = document.getElementById('page-filter');
-    if (fp) {
-      // 取消可能正在进行的关闭 timer
-      if (fp._closeTimer) { clearTimeout(fp._closeTimer); fp._closeTimer = null; }
-      fp.classList.remove('sheet-open', 'sheet-expanded', 'dragging'); fp.style.transform = ''; fp.style.maxHeight = ''; /* 移回原位置 */ if (fp.parentNode === document.body && fsection) fsection.appendChild(fp);
-    }
-    if (fb) { fb.classList.remove('show'); if (fb.parentNode === document.body && fsection) fsection.appendChild(fb); }
-    if (ft) ft.classList.remove('hidden');
-    if (fpage) { fpage.classList.remove('sheet-active', 'sheet-expanded-active'); }
-    document.body.style.overflow = '';
-    document.body.style.touchAction = '';
-    document.documentElement.style.overflow = '';
-    var navbarF = document.getElementById('navbar');
-    if (navbarF) navbarF.classList.remove('sheet-visible');
-  }
+  //（创意滤镜页已归档到 _parked/，离开清理逻辑随之移除）
 
   // 1. 旧页面：带方向退出
   if (oldSection) {
@@ -1022,15 +1001,7 @@ function switchPage(page) {
   // 注意：该函数定义在 DOMContentLoaded 闭包内，只能经 window 句柄调用
   if (window._movePanelsToBodyIfMobile) window._movePanelsToBodyIfMobile();
 
-  // 进入创意滤镜页时，确保弹窗为关闭态（只显示预览区+浮动按钮）
-  if (page === 'filter') {
-    var _fp = document.getElementById('filterPanel');
-    var _fb = document.getElementById('filterMobileBackdrop');
-    var _ft = document.getElementById('filterMobileToggle');
-    if (_fp) { _fp.classList.remove('sheet-open', 'sheet-expanded'); }
-    if (_fb) _fb.classList.remove('show');
-    if (_ft) _ft.classList.remove('hidden');
-  }
+  //（创意滤镜页已归档到 _parked/，进入重置逻辑随之移除）
 
   // 个人中心页面进入/离开回调
   if (page === 'profile' && typeof window.onProfilePageEnter === 'function') {

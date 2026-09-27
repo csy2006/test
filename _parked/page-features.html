@@ -1,0 +1,36 @@
+<!-- 归档区块：核心特性
+     原位置：index.html 第 137-168 行
+     归档日期：2026-09-27（暂时下线，勿删，可直接粘回 index.html 恢复）
+-->
+<!-- 2: 核心特性 -->
+<section class="page-section" id="page-features" data-page="features">
+
+  <main class="page-main">
+    <div class="features-grid">
+      <div class="feature-card glass-card">
+        <h3 data-i18n="featBilateral">双边滤波算法</h3>
+        <p data-i18n="featBilateralDesc">空间权重与色彩权重联合保边去噪，精准区分噪声与细节边缘，避免传统高斯滤波导致的模糊</p>
+        <div class="feature-formula">W = Gₛ(||x||) · Gᵣ(||I||)</div>
+      </div>
+      <div class="feature-card glass-card">
+        <h3 style="font-size:1.25rem; line-height:1.8; color:var(--ink);" data-i18n="featDS">数据结构</h3>
+        <p data-i18n="featDSDesc">综合运用哈希表、链表、大顶堆、队列等数据结构来管理处理流水线</p>
+      </div>
+      <div class="feature-card glass-card">
+        <h3 data-i18n="featCPP">C++ 后端</h3>
+        <p data-i18n="featCPPDesc">原生 C++ HTTP 服务器，LUT 加速双边滤波，Catmull-Rom 双三次上采样，Unsharp Mask 锐化</p>
+        <div class="feature-formula" style="font-size:0.7rem">MAX_EDGE=1000 · Radius≤5 · LUT×65536</div>
+      </div>
+      <div class="feature-card glass-card">
+        <h3 data-i18n="featFormat">多格式支持</h3>
+        <p data-i18n="featFormatDesc">支持 PNG、JPG、JPEG、RAW、BMP、TIFF、WebP 等主流图片格式输入，输出 PNG/JPEG/WebP</p>
+        <div class="feature-formula" style="font-size:0.7rem">PNG · JPG · RAW · BMP · TIFF · WebP</div>
+      </div>
+    </div>
+    <div class="cta-block">
+      <button class="btn btn-primary btn-lg" onclick="switchPage('guide')" data-i18n="btnViewGuide">查看参数指南 →</button>
+    </div>
+  </main>
+
+</section>
+
