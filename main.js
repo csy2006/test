@@ -783,7 +783,7 @@ window.addEventListener('load', function() {
 });
 
 // 页面切换 (SPA)
-const NAV_ORDER = ['home', 'upload', 'result', 'ticket', 'palette', 'archive', 'profile'];
+const NAV_ORDER = ['home', 'upload', 'result', 'ticket', 'batch', 'editor', 'history', 'archive', 'profile'];
 
 let _switchTimer = null;
 let _prevSection = null;
@@ -1890,6 +1890,102 @@ function setupFormatTabs() {
 }
 
 // 处理图像
+/**
+ * 降噪核心（与界面解耦，供单图处理与批量队列共用）
+ * @param {HTMLCanvasElement} srcCanvas 源图 canvas（全分辨率）
+ * @param {Object} opts { sigmaS, sigmaR, mode, onProgress(done, total) }
+ * @returns {Promise<HTMLCanvasElement>} 处理好的 canvas
+ */
+async function denoiseCanvas(srcCanvas, opts) {
+  opts = opts || {};
+  const sigmaS = opts.sigmaS;
+  const sigmaR = opts.sigmaR;
+  const mode = opts.mode || 'bilateral';
+  const onProgress = opts.onProgress || function () {};
+
+  const dw = srcCanvas.width;
+  const dh = srcCanvas.height;
+  const srcCtx = srcCanvas.getContext('2d');
+
+  const outCanvas = document.createElement('canvas');
+  outCanvas.width = dw;
+  outCanvas.height = dh;
+  const outCtx = outCanvas.getContext('2d');
+
+  // 分块参数：每块最大 1800px，块间留 32px 重叠消除拼接缝
+  const TILE = 1800;
+  const OVERLAP = 32;
+  const tilesX = Math.ceil(dw / TILE);
+  const tilesY = Math.ceil(dh / TILE);
+  const totalTiles = tilesX * tilesY;
+
+  let elapsedAcc = 0;
+
+  for (let ty = 0; ty < tilesY; ty++) {
+    for (let tx = 0; tx < tilesX; tx++) {
+      const sx = Math.max(0, tx * TILE - OVERLAP);
+      const sy = Math.max(0, ty * TILE - OVERLAP);
+      const sw = Math.min(TILE + 2 * OVERLAP, dw - sx);
+      const sh = Math.min(TILE + 2 * OVERLAP, dh - sy);
+      const tileData = srcCtx.getImageData(sx, sy, sw, sh);
+
+      const msgId = ++_denoiseMsgId;
+      const worker = getDenoiseWorker();
+
+      const { pixels, elapsed } = await new Promise((resolve, reject) => {
+        worker.onmessage = function (e) {
+          const { id, type, pixels, elapsed, message } = e.data;
+          if (id !== msgId) return;
+          if (type === 'error') { reject(new Error(message)); return; }
+          if (type === 'done') resolve({ pixels, elapsed: elapsed || 0 });
+        };
+        worker.onerror = () => reject(new Error('Worker 错误'));
+
+        const buffer = tileData.data.buffer.slice(0);
+        worker.postMessage({
+          id: msgId,
+          pixels: new Uint8ClampedArray(buffer),
+          width: sw, height: sh,
+          sigmaS, sigmaR, mode
+        }, [buffer]);
+      });
+
+      elapsedAcc += elapsed;
+
+      // 去掉重叠部分后写回输出 canvas
+      const ex = tx * TILE;
+      const ey = ty * TILE;
+      const ew = Math.min(TILE, dw - ex);
+      const eh = Math.min(TILE, dh - ey);
+      const dx = ex - sx;
+      const dy = ey - sy;
+
+      const outData = outCtx.createImageData(ew, eh);
+      const resultArr = new Uint8ClampedArray(pixels);
+      for (let y = 0; y < eh; y++) {
+        const srcOff = ((dy + y) * sw + dx) * 4;
+        const dstOff = y * ew * 4;
+        outData.data.set(resultArr.subarray(srcOff, srcOff + ew * 4), dstOff);
+      }
+      outCtx.putImageData(outData, ex, ey);
+
+      onProgress(ty * tilesX + tx + 1, totalTiles);
+    }
+  }
+
+  outCanvas._denoiseElapsed = Math.round(elapsedAcc);
+  return outCanvas;
+}
+
+// 对外暴露，供批量处理等模块复用同一套算法
+window.PrismDenDenoise = {
+  run: denoiseCanvas,
+  tileInfo: function (w, h) {
+    const TILE = 1800;
+    return Math.ceil(w / TILE) * Math.ceil(h / TILE);
+  }
+};
+
 async function processImage() {
   if (!currentFile) return;
   vibrate(10);
@@ -1922,90 +2018,28 @@ async function processImage() {
     const img = await loadImage(currentFile);
     const dw = img.naturalWidth, dh = img.naturalHeight;
 
-    // 源 canvas（全分辨率，后续逐块提取 tile）
+    // 源 canvas（全分辨率）
     const srcCanvas = document.createElement('canvas');
     srcCanvas.width = dw;
     srcCanvas.height = dh;
     const srcCtx = srcCanvas.getContext('2d');
     srcCtx.drawImage(img, 0, 0);
 
-    // 输出 canvas（全分辨率，tile 拼回）
-    const outCanvas = document.createElement('canvas');
-    outCanvas.width = dw;
-    outCanvas.height = dh;
-    const outCtx = outCanvas.getContext('2d');
-
-    // 分块降噪参数
-    const TILE = 1800;        // 每块最大尺寸（留 248px 给重叠）
-    const OVERLAP = 32;       // 相邻块重叠像素，消除拼接缝
-    const tilesX = Math.ceil(dw / TILE);
-    const tilesY = Math.ceil(dh / TILE);
-    const totalTiles = tilesX * tilesY;
-
+    const totalTiles = window.PrismDenDenoise.tileInfo(dw, dh);
     if (totalTiles > 1) {
-      showToast(`大图分块降噪（${tilesX}×${tilesY}=${totalTiles}块）`, 'info');
+      showToast(`大图分块降噪（共 ${totalTiles} 块）`, 'info');
     }
 
-    window._lastElapsed = 0;
-
-    for (let ty = 0; ty < tilesY; ty++) {
-      for (let tx = 0; tx < tilesX; tx++) {
-        // 从源图提取当前 tile（含重叠）
-        const sx = Math.max(0, tx * TILE - OVERLAP);
-        const sy = Math.max(0, ty * TILE - OVERLAP);
-        const sw = Math.min(TILE + 2 * OVERLAP, dw - sx);
-        const sh = Math.min(TILE + 2 * OVERLAP, dh - sy);
-        const tileData = srcCtx.getImageData(sx, sy, sw, sh);
-
-        // 送 worker 降噪
-        const msgId = ++_denoiseMsgId;
-        const worker = getDenoiseWorker();
-
-        const { pixels } = await new Promise((resolve, reject) => {
-          worker.onmessage = function (e) {
-            const { id, type, pixels, elapsed, message } = e.data;
-            if (id !== msgId) return;
-            if (type === 'error') { reject(new Error(message)); return; }
-            if (type === 'done') {
-              window._lastElapsed += (elapsed || 0);
-              resolve({ pixels });
-            }
-          };
-          worker.onerror = (err) => reject(new Error('Worker 错误'));
-
-          const buffer = tileData.data.buffer.slice(0);
-          worker.postMessage({
-            id: msgId,
-            pixels: new Uint8ClampedArray(buffer),
-            width: sw, height: sh,
-            sigmaS, sigmaR, mode: currentMode
-          }, [buffer]);
-        });
-
-        // 将有效区域（去除重叠）写回输出 canvas
-        const ex = tx * TILE;                    // 输出 canvas 上的 x
-        const ey = ty * TILE;                    // 输出 canvas 上的 y
-        const ew = Math.min(TILE, dw - ex);      // 有效宽度
-        const eh = Math.min(TILE, dh - ey);      // 有效高度
-        const dx = ex - sx;                      // 有效区在 tile 内的偏移 x
-        const dy = ey - sy;                      // 有效区在 tile 内的偏移 y
-
-        const outData = outCtx.createImageData(ew, eh);
-        const resultArr = new Uint8ClampedArray(pixels);
-        for (let y = 0; y < eh; y++) {
-          const srcOff = ((dy + y) * sw + dx) * 4;
-          const dstOff = y * ew * 4;
-          outData.data.set(resultArr.subarray(srcOff, srcOff + ew * 4), dstOff);
-        }
-        outCtx.putImageData(outData, ex, ey);
-
-        // 进度更新
-        const done = ty * tilesX + tx + 1;
-        const pct = Math.round((done / totalTiles) * 100);
+    // 复用降噪核心（与批量处理同一实现）
+    const outCanvas = await denoiseCanvas(srcCanvas, {
+      sigmaS, sigmaR, mode: currentMode,
+      onProgress: function (done, total) {
+        const pct = Math.round((done / total) * 100);
         if (progressBar) progressBar.style.width = pct + '%';
-        if (progressText) progressText.textContent = `分块降噪 ${done}/${totalTiles} (${pct}%)`;
+        if (progressText) progressText.textContent = `分块降噪 ${done}/${total} (${pct}%)`;
       }
-    }
+    });
+    window._lastElapsed = outCanvas._denoiseElapsed || 0;
 
     // 2. 输出为 PNG blob
     const resultBlobLocal = await new Promise((resolve, reject) => {

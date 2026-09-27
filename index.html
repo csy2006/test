@@ -17,7 +17,8 @@
   <!-- filter.css 已随创意滤镜模块归档到 _parked/，暂不加载 -->
   <link rel="stylesheet" href="ticket.css" />
   <link rel="stylesheet" href="profile.css" />
-  <link rel="stylesheet" href="palette.css" />
+  <!-- palette.css 已随色卡模块归档到 _parked/，暂不加载 -->
+  <link rel="stylesheet" href="modules.css" />
   <link rel="stylesheet" href="archive.css" />
   <link rel="icon" href="./002.jpg" type="image/x-icon">
   <script>
@@ -70,7 +71,9 @@
     <span class="nav-link" data-page="upload" data-i18n="navUpload">图像降噪</span>
     <span class="nav-link" data-page="result" data-i18n="navResult">降噪结果</span>
     <span class="nav-link" data-page="ticket" data-i18n="navTicket">旅行票根</span>
-    <span class="nav-link" data-page="palette" data-i18n="navPalette">色卡</span>
+    <span class="nav-link" data-page="batch">批量处理</span>
+    <span class="nav-link" data-page="editor">图像编辑</span>
+    <span class="nav-link" data-page="history">处理日志</span>
     <span class="nav-link" data-page="archive" data-i18n="navArchive">档案库</span>
     <span class="nav-link" data-page="profile" data-i18n="navProfile">设置中心</span>
   </div>
@@ -531,6 +534,219 @@
 </section><!-- end #page-ticket -->
 
 <!-- 9: 图片档案库 -->
+<!-- 10: 批量处理 -->
+<section class="page-section" id="page-batch" data-page="batch">
+  <main class="mod-main">
+    <h2 class="mod-title">批量处理</h2>
+    <p class="mod-sub">一次导入多张图片排队降噪，可随时暂停、取消、重试失败项，完成后打包下载。大图会自动分块处理。</p>
+
+    <div class="mod-card">
+      <div class="batch-zone" id="batchZone">
+        点击或拖拽图片到此处导入（支持多选）
+        <input type="file" id="batchFileInput" accept="image/*" multiple hidden />
+      </div>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-row">
+        <div class="mod-field">
+          <label>空间半径 σₛ <span class="mod-val" id="batchSigmaSVal">5</span></label>
+          <input type="range" id="batchSigmaS" min="1" max="15" value="5" />
+        </div>
+        <div class="mod-field">
+          <label>颜色阈值 σᵣ <span class="mod-val" id="batchSigmaRVal">25</span></label>
+          <input type="range" id="batchSigmaR" min="1" max="100" value="25" />
+        </div>
+        <div class="mod-field">
+          <label>降噪模式</label>
+          <div style="display:flex; gap:0.8rem;">
+            <label class="batch-radio"><input type="radio" name="batchMode" value="bilateral" checked /> 彩色</label>
+            <label class="batch-radio"><input type="radio" name="batchMode" value="grayscale" /> 灰度</label>
+          </div>
+        </div>
+        <div class="mod-field">
+          <label>输出格式</label>
+          <select id="batchFormat">
+            <option value="png">PNG（无损）</option>
+            <option value="jpeg">JPEG（体积小）</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <div class="mod-field hidden" id="batchQualityRow">
+          <label>输出质量 <span class="mod-val" id="batchQualityVal">92</span></label>
+          <input type="range" id="batchQuality" min="50" max="100" value="92" />
+        </div>
+        <div class="mod-field">
+          <label class="batch-radio" style="padding-bottom:0.5rem;">
+            <input type="checkbox" id="batchSaveArchive" /> 完成后自动存入档案库
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="batch-overall"><div class="batch-overall-fill" id="batchOverallBar"></div></div>
+
+    <div class="batch-summary" id="batchSummary"></div>
+
+    <div class="mod-card">
+      <div class="mod-row" style="margin-bottom:1rem;">
+        <button class="mod-btn primary" id="batchStartBtn">开始处理</button>
+        <button class="mod-btn" id="batchPauseBtn">暂停</button>
+        <button class="mod-btn danger" id="batchCancelBtn">取消</button>
+        <button class="mod-btn" id="batchPickBtn">继续添加</button>
+        <button class="mod-btn" id="batchPackBtn">打包下载全部</button>
+        <button class="mod-btn danger" id="batchClearBtn">清理已完成</button>
+      </div>
+
+      <div class="batch-list" id="batchList"></div>
+      <div class="mod-empty hidden" id="batchEmpty">还没有任务，先导入几张图片吧</div>
+    </div>
+  </main>
+</section>
+
+<!-- 11: 图像编辑 -->
+<section class="page-section" id="page-editor" data-page="editor">
+  <main class="mod-main">
+    <h2 class="mod-title">图像编辑</h2>
+    <p class="mod-sub">裁剪、旋转翻转、亮度对比度饱和度调整与锐化，实时预览，可导出或存入档案库。在预览图上点击可移动裁剪框中心。</p>
+
+    <div class="editor-zone" id="editorZone">
+      点击或拖拽图片到此处开始编辑
+      <input type="file" id="editorFileInput" accept="image/*" hidden />
+    </div>
+
+    <div class="editor-layout hidden" id="editorStageWrap" style="margin-top:1.2rem;">
+      <div class="editor-stage" id="editorStage">
+        <canvas id="editorCanvas"></canvas>
+      </div>
+
+      <div class="editor-panel hidden" id="editorPanel">
+        <div class="mod-card" style="margin:0;">
+          <div class="editor-group" style="border-top:none; padding-top:0;">
+            <div class="editor-group-title">裁剪</div>
+            <div class="editor-slider-row">
+              <span>比例</span>
+              <select id="editorCropRatio">
+                <option value="origin">原图比例</option>
+                <option value="1:1">1:1 方形</option>
+                <option value="4:3">4:3</option>
+                <option value="3:2">3:2</option>
+                <option value="16:9">16:9</option>
+              </select>
+            </div>
+            <div class="editor-slider-row">
+              <span>取景</span>
+              <input type="range" id="editorCropScale" min="30" max="100" value="100" />
+              <span class="mod-val" id="editorCropScaleVal">100%</span>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <div class="editor-group-title">旋转与翻转</div>
+            <div class="editor-slider-row">
+              <span>角度</span>
+              <select id="editorRotate">
+                <option value="0">0°</option>
+                <option value="90">90°</option>
+                <option value="180">180°</option>
+                <option value="270">270°</option>
+              </select>
+            </div>
+            <div class="mod-row">
+              <button class="mod-btn" id="editorFlipH">水平翻转</button>
+              <button class="mod-btn" id="editorFlipV">垂直翻转</button>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <div class="editor-group-title">色彩调整</div>
+            <div class="editor-slider-row">
+              <span>亮度</span>
+              <input type="range" id="editorBrightness" min="-100" max="100" value="0" />
+              <span class="mod-val" id="editorBrightnessVal">0</span>
+            </div>
+            <div class="editor-slider-row">
+              <span>对比</span>
+              <input type="range" id="editorContrast" min="-100" max="100" value="0" />
+              <span class="mod-val" id="editorContrastVal">0</span>
+            </div>
+            <div class="editor-slider-row">
+              <span>饱和</span>
+              <input type="range" id="editorSaturation" min="-100" max="100" value="0" />
+              <span class="mod-val" id="editorSaturationVal">0</span>
+            </div>
+            <div class="editor-slider-row">
+              <span>锐化</span>
+              <input type="range" id="editorSharpen" min="0" max="100" value="0" />
+              <span class="mod-val" id="editorSharpenVal">0</span>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <div class="editor-group-title">预设风格</div>
+            <select id="editorPreset" style="width:100%;">
+              <option value="none">不使用</option>
+              <option value="vivid">鲜艳</option>
+              <option value="mono">黑白</option>
+              <option value="retro">复古</option>
+            </select>
+          </div>
+
+          <div class="editor-group">
+            <div class="editor-group-title">输出</div>
+            <select id="editorFormat" style="width:100%; margin-bottom:0.6rem;">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPEG</option>
+              <option value="webp">WebP</option>
+            </select>
+            <div class="mod-row">
+              <button class="mod-btn primary" id="editorDownloadBtn">导出图片</button>
+              <button class="mod-btn" id="editorArchiveBtn">存档案库</button>
+              <button class="mod-btn" id="editorPickBtn">更换图片</button>
+              <button class="mod-btn danger" id="editorResetBtn">重置参数</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-info" id="editorInfo"></div>
+    <div style="display:none;" id="editorFileName"></div>
+  </main>
+</section>
+
+<!-- 12: 处理日志 -->
+<section class="page-section" id="page-history" data-page="history">
+  <main class="mod-main">
+    <h2 class="mod-title">处理日志</h2>
+    <p class="mod-sub">自动记录每一次处理的时间、参数与耗时，可筛选、搜索、导出 CSV，便于回溯与统计。</p>
+
+    <div class="log-stats" id="logStats"></div>
+
+    <div class="log-toolbar">
+      <div class="log-tabs" id="logTypeTabs">
+        <button class="log-tab active" data-value="all">全部类型</button>
+        <button class="log-tab" data-value="denoise">图像降噪</button>
+        <button class="log-tab" data-value="batch">批量处理</button>
+        <button class="log-tab" data-value="edit">图像编辑</button>
+        <button class="log-tab" data-value="import">图片导入</button>
+      </div>
+      <div class="log-tabs" id="logStatusTabs">
+        <button class="log-tab active" data-value="all">全部状态</button>
+        <button class="log-tab" data-value="success">成功</button>
+        <button class="log-tab" data-value="error">失败</button>
+      </div>
+      <input type="text" class="log-search" id="logSearch" placeholder="搜索文件名或参数…" />
+      <button class="mod-btn" id="logRefreshBtn">刷新</button>
+      <button class="mod-btn primary" id="logExportBtn">导出 CSV</button>
+      <button class="mod-btn danger" id="logClearBtn">清空</button>
+    </div>
+
+    <div class="log-list" id="logList"></div>
+    <div class="mod-empty hidden" id="logEmpty">暂无处理记录，去处理一张图片试试</div>
+  </main>
+</section>
+
 <section class="page-section" id="page-archive" data-page="archive">
   <main class="page-main archive-main">
 
@@ -606,6 +822,7 @@
 
   <div class="archive-drop-hint" id="archiveDropHint">松开鼠标，导入图片</div>
 </section>
+
 
 <!-- 8: 设置中心 -->
 <section class="page-section" id="page-profile" data-page="profile">
@@ -749,57 +966,6 @@
   </main>
 </section>
 
-<!-- 8: 调色盘提取 -->
-<section class="page-section" id="page-palette" data-page="palette">
-
-  <div class="palette-app" id="paletteApp">
-    <!-- 顶部操作栏 -->
-    <div class="palette-header">
-      <div class="palette-brand" data-i18n="paletteBrand">PhotoColors</div>
-      <div class="palette-header-actions">
-        <button class="palette-header-btn" id="paletteUploadBtn" title="上传图片" aria-label="上传图片">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        </button>
-        <button class="palette-header-btn" id="paletteDownloadBtn" title="保存合成图" aria-label="保存合成图">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        </button>
-        <button class="palette-header-btn" id="paletteResetBtn" title="重新上传" aria-label="重新上传">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- 空状态 -->
-    <div class="palette-empty" id="paletteEmptyState">
-      <div class="palette-empty-circles">
-        <div class="palette-empty-circle"></div>
-        <div class="palette-empty-circle"></div>
-        <div class="palette-empty-circle"></div>
-      </div>
-      <h1 class="palette-empty-title" data-i18n="paletteEmptyTitle">Moments in Living Color</h1>
-      <p class="palette-empty-desc" data-i18n="paletteEmptyDesc">为每一刻生动的瞬间，赋予它独一无二的色彩。</p>
-      <button class="palette-upload-main" id="paletteUploadMainBtn" aria-label="上传图片">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      </button>
-      <input type="file" id="paletteFileInput" accept="image/*" style="display:none">
-    </div>
-
-    <!-- 结果状态 -->
-    <div class="palette-result" id="paletteResultState">
-      <div class="palette-result-meta">
-        <div class="palette-result-title" id="paletteResultTitle"></div>
-        <div class="palette-result-subtitle" id="paletteResultSubtitle"></div>
-      </div>
-      <div class="palette-image-card" id="paletteImageCard">
-        <img id="paletteResultImg" alt="palette result">
-      </div>
-    </div>
-  </div>
-
-  <div class="palette-toast" id="paletteToast"></div>
-
-</section>
-
 <!-- 底部版权（固定底部，不撑开高度） -->
 <div class="site-footer" data-i18n="footer">© 2026 Young__Yang. All rights reserved.</div>
 
@@ -826,7 +992,10 @@
 <script src="main.js"></script>
 <!-- filter.js 已随创意滤镜模块归档到 _parked/，暂不加载 -->
 <script src="profile.js"></script>
-<script src="palette.js"></script>
+<!-- palette.js 已随色卡模块归档到 _parked/，暂不加载 -->
+<script src="history.js"></script>
+<script src="batch.js"></script>
+<script src="editor.js"></script>
 <script src="archive.js"></script>
 </body>
 </html>
