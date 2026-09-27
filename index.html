@@ -71,9 +71,9 @@
     <span class="nav-link" data-page="upload" data-i18n="navUpload">图像降噪</span>
     <span class="nav-link" data-page="result" data-i18n="navResult">降噪结果</span>
     <span class="nav-link" data-page="ticket" data-i18n="navTicket">旅行票根</span>
-    <span class="nav-link" data-page="batch">批量处理</span>
-    <span class="nav-link" data-page="editor">图像编辑</span>
-    <span class="nav-link" data-page="history">处理日志</span>
+    <span class="nav-link" data-page="batch" data-i18n="navBatch">批量处理</span>
+    <span class="nav-link" data-page="editor" data-i18n="navEditor">图像编辑</span>
+    <span class="nav-link" data-page="history" data-i18n="navHistory">处理日志</span>
     <span class="nav-link" data-page="archive" data-i18n="navArchive">档案库</span>
     <span class="nav-link" data-page="profile" data-i18n="navProfile">设置中心</span>
   </div>
@@ -537,12 +537,12 @@
 <!-- 10: 批量处理 -->
 <section class="page-section" id="page-batch" data-page="batch">
   <main class="mod-main">
-    <h2 class="mod-title">批量处理</h2>
-    <p class="mod-sub">一次导入多张图片排队降噪，可随时暂停、取消、重试失败项，完成后打包下载。大图会自动分块处理。</p>
+    <h2 class="mod-title" data-i18n="batchTitle">批量处理</h2>
+    <p class="mod-sub" data-i18n="batchSub">一次导入多张图片排队降噪，可随时暂停、取消、重试失败项，完成后打包下载。大图会自动分块处理。</p>
 
     <div class="mod-card">
       <div class="batch-zone" id="batchZone">
-        点击或拖拽图片到此处导入（支持多选）
+        <span data-i18n="batchDropHint">点击或拖拽图片到此处导入（支持多选）</span>
         <input type="file" id="batchFileInput" accept="image/*" multiple hidden />
       </div>
     </div>
@@ -550,57 +550,57 @@
     <div class="mod-card">
       <div class="mod-row">
         <div class="mod-field">
-          <label>空间半径 σₛ <span class="mod-val" id="batchSigmaSVal">5</span></label>
+          <label><span data-i18n="batchSigmaS">空间半径 σₛ</span> <span class="mod-val" id="batchSigmaSVal">5</span></label>
           <input type="range" id="batchSigmaS" min="1" max="15" value="5" />
         </div>
         <div class="mod-field">
-          <label>颜色阈值 σᵣ <span class="mod-val" id="batchSigmaRVal">25</span></label>
+          <label><span data-i18n="batchSigmaR">颜色阈值 σᵣ</span> <span class="mod-val" id="batchSigmaRVal">25</span></label>
           <input type="range" id="batchSigmaR" min="1" max="100" value="25" />
         </div>
         <div class="mod-field">
-          <label>降噪模式</label>
+          <label data-i18n="batchMode">降噪模式</label>
           <div style="display:flex; gap:0.8rem;">
-            <label class="batch-radio"><input type="radio" name="batchMode" value="bilateral" checked /> 彩色</label>
-            <label class="batch-radio"><input type="radio" name="batchMode" value="grayscale" /> 灰度</label>
+            <label class="batch-radio"><input type="radio" name="batchMode" value="bilateral" checked /> <span data-i18n="batchModeColor">彩色</span></label>
+            <label class="batch-radio"><input type="radio" name="batchMode" value="grayscale" /> <span data-i18n="batchModeGray">灰度</span></label>
           </div>
         </div>
         <div class="mod-field">
-          <label>输出格式</label>
+          <label data-i18n="batchOutFormat">输出格式</label>
           <select id="batchFormat">
-            <option value="png">PNG（无损）</option>
-            <option value="jpeg">JPEG（体积小）</option>
-            <option value="webp">WebP</option>
+            <option value="png" data-i18n="batchFmtPng">PNG（无损）</option>
+            <option value="jpeg" data-i18n="batchFmtJpeg">JPEG（体积小）</option>
+            <option value="webp" data-i18n="batchFmtWebp">WebP</option>
           </select>
         </div>
         <div class="mod-field hidden" id="batchQualityRow">
-          <label>输出质量 <span class="mod-val" id="batchQualityVal">92</span></label>
+          <label><span data-i18n="batchQuality">输出质量</span> <span class="mod-val" id="batchQualityVal">92</span></label>
           <input type="range" id="batchQuality" min="50" max="100" value="92" />
         </div>
         <div class="mod-field">
-          <label>单张像素上限</label>
+          <label data-i18n="batchMaxPixels">单张像素上限</label>
           <select id="batchMaxPixels">
-            <option value="4000000" selected>400 万（推荐，约 5 秒/张）</option>
-            <option value="8000000">800 万（约 11 秒/张）</option>
-            <option value="12000000">1200 万（约 16 秒/张）</option>
-            <option value="0">不限制（大图会很慢）</option>
+            <option value="4000000" selected data-i18n="batchPx4m">400 万（推荐，约 5 秒/张）</option>
+            <option value="8000000" data-i18n="batchPx8m">800 万（约 11 秒/张）</option>
+            <option value="12000000" data-i18n="batchPx12m">1200 万（约 16 秒/张）</option>
+            <option value="0" data-i18n="batchPxNone">不限制（大图会很慢）</option>
           </select>
         </div>
         <div class="mod-field">
-          <label>单张超时</label>
+          <label data-i18n="batchTimeout">单张超时</label>
           <select id="batchTimeout">
-            <option value="30">30 秒</option>
-            <option value="60" selected>60 秒</option>
-            <option value="180">180 秒</option>
-            <option value="0">不限制</option>
+            <option value="30" data-i18n="batchTimeout30">30 秒</option>
+            <option value="60" selected data-i18n="batchTimeout60">60 秒</option>
+            <option value="180" data-i18n="batchTimeout180">180 秒</option>
+            <option value="0" data-i18n="batchTimeoutNone">不限制</option>
           </select>
         </div>
         <div class="mod-field">
           <label class="batch-radio" style="padding-bottom:0.5rem;">
-            <input type="checkbox" id="batchSaveArchive" /> 完成后自动存入档案库
+            <input type="checkbox" id="batchSaveArchive" /> <span data-i18n="batchAutoArchive">完成后自动存入档案库</span>
           </label>
         </div>
       </div>
-      <p style="margin:0.7rem 0 0; font-size:0.76rem; color:var(--stone); line-height:1.6;">
+      <p style="margin:0.7rem 0 0; font-size:0.76rem; color:var(--stone); line-height:1.6;" data-i18n="batchLimitTip">
         超过像素上限的图片会先等比缩小再降噪，避免单张耗时过久；超时未完成的会自动跳过并标记为失败，不拖住后面的图片。
       </p>
     </div>
@@ -612,16 +612,16 @@
 
     <div class="mod-card">
       <div class="mod-row" style="margin-bottom:1rem;">
-        <button class="mod-btn primary" id="batchStartBtn">开始处理</button>
-        <button class="mod-btn" id="batchPauseBtn">暂停</button>
-        <button class="mod-btn danger" id="batchCancelBtn">取消</button>
-        <button class="mod-btn" id="batchPickBtn">继续添加</button>
-        <button class="mod-btn" id="batchPackBtn">打包下载全部</button>
-        <button class="mod-btn danger" id="batchClearBtn">清理已完成</button>
+        <button class="mod-btn primary" id="batchStartBtn" data-i18n="batchBtnStart">开始处理</button>
+        <button class="mod-btn" id="batchPauseBtn" data-i18n="batchBtnPause">暂停</button>
+        <button class="mod-btn danger" id="batchCancelBtn" data-i18n="batchBtnCancel">取消</button>
+        <button class="mod-btn" id="batchPickBtn" data-i18n="batchBtnAdd">继续添加</button>
+        <button class="mod-btn" id="batchPackBtn" data-i18n="batchBtnPack">打包下载全部</button>
+        <button class="mod-btn danger" id="batchClearBtn" data-i18n="batchBtnClean">清理已完成</button>
       </div>
 
       <div class="batch-list" id="batchList"></div>
-      <div class="mod-empty hidden" id="batchEmpty">还没有任务，先导入几张图片吧</div>
+      <div class="mod-empty hidden" id="batchEmpty" data-i18n="batchEmpty">还没有任务，先导入几张图片吧</div>
     </div>
   </main>
 </section>
@@ -629,11 +629,11 @@
 <!-- 11: 图像编辑 -->
 <section class="page-section" id="page-editor" data-page="editor">
   <main class="mod-main">
-    <h2 class="mod-title">图像编辑</h2>
-    <p class="mod-sub">裁剪、旋转翻转、亮度对比度饱和度调整与锐化，实时预览，可导出或存入档案库。在预览图上点击可移动裁剪框中心。</p>
+    <h2 class="mod-title" data-i18n="editorTitle">图像编辑</h2>
+    <p class="mod-sub" data-i18n="editorSub">裁剪、旋转翻转、亮度对比度饱和度调整与锐化，实时预览，可导出或存入档案库。在预览图上点击可移动裁剪框中心。</p>
 
     <div class="editor-zone" id="editorZone">
-      点击或拖拽图片到此处开始编辑
+      <span data-i18n="editorDropHint">点击或拖拽图片到此处开始编辑</span>
       <input type="file" id="editorFileInput" accept="image/*" hidden />
     </div>
 
@@ -645,11 +645,11 @@
       <div class="editor-panel hidden" id="editorPanel">
         <div class="mod-card" style="margin:0;">
           <div class="editor-group" style="border-top:none; padding-top:0;">
-            <div class="editor-group-title">裁剪</div>
+            <div class="editor-group-title" data-i18n="editorCrop">裁剪</div>
             <div class="editor-slider-row">
-              <span>比例</span>
+              <span data-i18n="editorRatio">比例</span>
               <select id="editorCropRatio">
-                <option value="origin">原图比例</option>
+                <option value="origin" data-i18n="editorRatioOrigin">原图比例</option>
                 <option value="1:1">1:1 方形</option>
                 <option value="4:3">4:3</option>
                 <option value="3:2">3:2</option>
@@ -657,16 +657,16 @@
               </select>
             </div>
             <div class="editor-slider-row">
-              <span>取景</span>
+              <span data-i18n="editorFraming">取景</span>
               <input type="range" id="editorCropScale" min="30" max="100" value="100" />
               <span class="mod-val" id="editorCropScaleVal">100%</span>
             </div>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title">旋转与翻转</div>
+            <div class="editor-group-title" data-i18n="editorRotateFlip">旋转与翻转</div>
             <div class="editor-slider-row">
-              <span>角度</span>
+              <span data-i18n="editorAngle">角度</span>
               <select id="editorRotate">
                 <option value="0">0°</option>
                 <option value="90">90°</option>
@@ -675,57 +675,57 @@
               </select>
             </div>
             <div class="mod-row">
-              <button class="mod-btn" id="editorFlipH">水平翻转</button>
-              <button class="mod-btn" id="editorFlipV">垂直翻转</button>
+              <button class="mod-btn" id="editorFlipH" data-i18n="editorFlipH">水平翻转</button>
+              <button class="mod-btn" id="editorFlipV" data-i18n="editorFlipV">垂直翻转</button>
             </div>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title">色彩调整</div>
+            <div class="editor-group-title" data-i18n="editorColor">色彩调整</div>
             <div class="editor-slider-row">
-              <span>亮度</span>
+              <span data-i18n="editorBrightness">亮度</span>
               <input type="range" id="editorBrightness" min="-100" max="100" value="0" />
               <span class="mod-val" id="editorBrightnessVal">0</span>
             </div>
             <div class="editor-slider-row">
-              <span>对比</span>
+              <span data-i18n="editorContrast">对比</span>
               <input type="range" id="editorContrast" min="-100" max="100" value="0" />
               <span class="mod-val" id="editorContrastVal">0</span>
             </div>
             <div class="editor-slider-row">
-              <span>饱和</span>
+              <span data-i18n="editorSaturation">饱和</span>
               <input type="range" id="editorSaturation" min="-100" max="100" value="0" />
               <span class="mod-val" id="editorSaturationVal">0</span>
             </div>
             <div class="editor-slider-row">
-              <span>锐化</span>
+              <span data-i18n="editorSharpen">锐化</span>
               <input type="range" id="editorSharpen" min="0" max="100" value="0" />
               <span class="mod-val" id="editorSharpenVal">0</span>
             </div>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title">预设风格</div>
+            <div class="editor-group-title" data-i18n="editorPreset">预设风格</div>
             <select id="editorPreset" style="width:100%;">
-              <option value="none">不使用</option>
-              <option value="vivid">鲜艳</option>
-              <option value="mono">黑白</option>
-              <option value="retro">复古</option>
+              <option value="none" data-i18n="editorPresetNone">不使用</option>
+              <option value="vivid" data-i18n="editorPresetVivid">鲜艳</option>
+              <option value="mono" data-i18n="editorPresetMono">黑白</option>
+              <option value="retro" data-i18n="editorPresetRetro">复古</option>
             </select>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title">输出</div>
+            <div class="editor-group-title" data-i18n="editorOutput">输出</div>
             <select id="editorFormat" style="width:100%; margin-bottom:0.6rem;">
               <option value="png">PNG</option>
               <option value="jpeg">JPEG</option>
               <option value="webp">WebP</option>
             </select>
             <div class="mod-row">
-              <button class="mod-btn primary" id="editorDownloadBtn">导出图片</button>
-              <button class="mod-btn" id="editorArchiveBtn">存档案库</button>
-              <button class="mod-btn" id="editorPickBtn">更换图片</button>
-              <button class="mod-btn danger" id="editorResetBtn">重置参数</button>
+              <button class="mod-btn primary" id="editorDownloadBtn" data-i18n="editorBtnExport">导出图片</button>
+              <button class="mod-btn" id="editorArchiveBtn" data-i18n="editorBtnArchive">存档案库</button>
+              <button class="mod-btn" id="editorPickBtn" data-i18n="editorBtnChange">更换图片</button>
+              <button class="mod-btn danger" id="editorResetBtn" data-i18n="editorBtnReset">重置参数</button>
             </div>
           </div>
         </div>
@@ -740,32 +740,32 @@
 <!-- 12: 处理日志 -->
 <section class="page-section" id="page-history" data-page="history">
   <main class="mod-main">
-    <h2 class="mod-title">处理日志</h2>
-    <p class="mod-sub">自动记录每一次处理的时间、参数与耗时，可筛选、搜索、导出 CSV，便于回溯与统计。</p>
+    <h2 class="mod-title" data-i18n="historyTitle">处理日志</h2>
+    <p class="mod-sub" data-i18n="historySub">自动记录每一次处理的时间、参数与耗时，可筛选、搜索、导出 CSV，便于回溯与统计。</p>
 
     <div class="log-stats" id="logStats"></div>
 
     <div class="log-toolbar">
       <div class="log-tabs" id="logTypeTabs">
-        <button class="log-tab active" data-value="all">全部类型</button>
-        <button class="log-tab" data-value="denoise">图像降噪</button>
-        <button class="log-tab" data-value="batch">批量处理</button>
-        <button class="log-tab" data-value="edit">图像编辑</button>
-        <button class="log-tab" data-value="import">图片导入</button>
+        <button class="log-tab active" data-value="all" data-i18n="logTabAllTypes">全部类型</button>
+        <button class="log-tab" data-value="denoise" data-i18n="logTabDenoise">图像降噪</button>
+        <button class="log-tab" data-value="batch" data-i18n="logTabBatch">批量处理</button>
+        <button class="log-tab" data-value="edit" data-i18n="logTabEdit">图像编辑</button>
+        <button class="log-tab" data-value="import" data-i18n="logTabImport">图片导入</button>
       </div>
       <div class="log-tabs" id="logStatusTabs">
-        <button class="log-tab active" data-value="all">全部状态</button>
-        <button class="log-tab" data-value="success">成功</button>
-        <button class="log-tab" data-value="error">失败</button>
+        <button class="log-tab active" data-value="all" data-i18n="logTabAllStatus">全部状态</button>
+        <button class="log-tab" data-value="success" data-i18n="logStatusSuccess">成功</button>
+        <button class="log-tab" data-value="error" data-i18n="logStatusError">失败</button>
       </div>
-      <input type="text" class="log-search" id="logSearch" placeholder="搜索文件名或参数…" />
-      <button class="mod-btn" id="logRefreshBtn">刷新</button>
-      <button class="mod-btn primary" id="logExportBtn">导出 CSV</button>
-      <button class="mod-btn danger" id="logClearBtn">清空</button>
+      <input type="text" class="log-search" id="logSearch" data-i18n-placeholder="logSearchPh" placeholder="搜索文件名或参数…" />
+      <button class="mod-btn" id="logRefreshBtn" data-i18n="logBtnRefresh">刷新</button>
+      <button class="mod-btn primary" id="logExportBtn" data-i18n="logBtnExport">导出 CSV</button>
+      <button class="mod-btn danger" id="logClearBtn" data-i18n="logBtnClear">清空</button>
     </div>
 
     <div class="log-list" id="logList"></div>
-    <div class="mod-empty hidden" id="logEmpty">暂无处理记录，去处理一张图片试试</div>
+    <div class="mod-empty hidden" id="logEmpty" data-i18n="logEmpty">暂无处理记录，去处理一张图片试试</div>
   </main>
 </section>
 

@@ -38,7 +38,7 @@ var i18n = (function () {
     statusConnecting:    { zh: '等待后端连接...', en: 'Connecting...' },
     statusConnected:     { zh: '后端已连接',     en: 'Connected' },
     statusError:         { zh: '连接失败',       en: 'Connection failed' },
-    // brandTag:            { zh: '棱镜降噪',   en: ' · PrismDen' },
+    brandTag:            { zh: 'PrismDen -- Young__Yang', en: 'PrismDen -- Young__Yang' },
 
     /* 首页 */
     heroKanji:         { zh: 'Image Processing · Young__Yang', en: 'Image Processing · Young__Yang' },
@@ -278,15 +278,193 @@ var i18n = (function () {
     archConfirmClear:   { zh: '确定要清空档案库中的所有图片吗？', en: 'Clear ALL archived images?' },
     archConfirmDelete:  { zh: '确定要删除这张图片吗？', en: 'Delete this image?' },
     archSaveEmpty:      { zh: '当前没有可存入的结果', en: 'Nothing to archive yet' },
-    archTagsSaved:      { zh: '标签已保存', en: 'Tags saved' }
+    archTagsSaved:      { zh: '标签已保存', en: 'Tags saved' },
+
+    /* ───────── 导航栏：新增三模块 ───────── */
+    navBatch:           { zh: '批量处理',   en: 'Batch' },
+    navEditor:          { zh: '图像编辑',   en: 'Editor' },
+    navHistory:         { zh: '处理日志',   en: 'Log' },
+
+    /* ───────── 批量处理 ───────── */
+    batchTitle:         { zh: '批量处理',   en: 'Batch Processing' },
+    batchSub:           { zh: '一次导入多张图片排队降噪，可随时暂停、取消、重试失败项，完成后打包下载。大图会自动分块处理。',
+                          en: 'Queue multiple images for denoising. Pause, cancel or retry any time, then download all results as a ZIP. Large images are processed tile by tile.' },
+    batchDropHint:      { zh: '点击或拖拽图片到此处导入（支持多选）', en: 'Click or drag images here (multiple selection supported)' },
+    batchSigmaS:        { zh: '空间半径 σₛ', en: 'Spatial radius σₛ' },
+    batchSigmaR:        { zh: '颜色阈值 σᵣ', en: 'Color threshold σᵣ' },
+    batchMode:          { zh: '降噪模式',   en: 'Mode' },
+    batchModeColor:     { zh: '彩色',       en: 'Color' },
+    batchModeGray:      { zh: '灰度',       en: 'Grayscale' },
+    batchOutFormat:     { zh: '输出格式',   en: 'Output format' },
+    batchFmtPng:        { zh: 'PNG（无损）', en: 'PNG (lossless)' },
+    batchFmtJpeg:       { zh: 'JPEG（体积小）', en: 'JPEG (smaller)' },
+    batchFmtWebp:       { zh: 'WebP',       en: 'WebP' },
+    batchQuality:       { zh: '输出质量',   en: 'Quality' },
+    batchMaxPixels:     { zh: '单张像素上限', en: 'Max pixels / image' },
+    batchPx4m:          { zh: '400 万（推荐，约 5 秒/张）', en: '4 MP (recommended, ~5s each)' },
+    batchPx8m:          { zh: '800 万（约 11 秒/张）', en: '8 MP (~11s each)' },
+    batchPx12m:         { zh: '1200 万（约 16 秒/张）', en: '12 MP (~16s each)' },
+    batchPxNone:        { zh: '不限制（大图会很慢）', en: 'No limit (slow for large images)' },
+    batchTimeout:       { zh: '单张超时',   en: 'Timeout / image' },
+    batchTimeout30:     { zh: '30 秒',      en: '30 s' },
+    batchTimeout60:     { zh: '60 秒',      en: '60 s' },
+    batchTimeout180:    { zh: '180 秒',     en: '180 s' },
+    batchTimeoutNone:   { zh: '不限制',     en: 'No limit' },
+    batchAutoArchive:   { zh: '完成后自动存入档案库', en: 'Auto-save to Archive when done' },
+    batchLimitTip:      { zh: '超过像素上限的图片会先等比缩小再降噪，避免单张耗时过久；超时未完成的会自动跳过并标记为失败，不拖住后面的图片。',
+                          en: 'Images above the pixel limit are downscaled first to keep each one fast. Timed-out images are skipped and marked as failed, so they never block the queue.' },
+    batchBtnStart:      { zh: '开始处理',   en: 'Start' },
+    batchBtnRunning:    { zh: '处理中…',    en: 'Processing…' },
+    batchBtnPause:      { zh: '暂停',       en: 'Pause' },
+    batchBtnCancel:     { zh: '取消',       en: 'Cancel' },
+    batchBtnAdd:        { zh: '继续添加',   en: 'Add more' },
+    batchBtnPack:       { zh: '打包下载全部', en: 'Download all (ZIP)' },
+    batchBtnClean:      { zh: '清理已完成', en: 'Clear finished' },
+    batchEmpty:         { zh: '还没有任务，先导入几张图片吧', en: 'No tasks yet — import some images to start' },
+    batchStatTotal:     { zh: '总任务',     en: 'Total' },
+    batchStatDone:      { zh: '已完成',     en: 'Done' },
+    batchStatFailed:    { zh: '失败',       en: 'Failed' },
+    batchStatPending:   { zh: '等待中',     en: 'Pending' },
+    batchStatProgress:  { zh: '总进度',     en: 'Progress' },
+    batchStatusPending: { zh: '等待中',     en: 'Pending' },
+    batchStatusRunning: { zh: '处理中',     en: 'Processing' },
+    batchStatusDone:    { zh: '已完成',     en: 'Done' },
+    batchStatusError:   { zh: '失败',       en: 'Failed' },
+    batchStatusCancel:  { zh: '已取消',     en: 'Cancelled' },
+    batchActDownload:   { zh: '下载',       en: 'Download' },
+    batchActArchive:    { zh: '存档案',     en: 'Archive' },
+    batchActRetry:      { zh: '重试',       en: 'Retry' },
+    batchActRemove:     { zh: '移除',       en: 'Remove' },
+    batchProcessing:    { zh: '正在处理第 {i}/{n} 张：{name}', en: 'Processing {i}/{n}: {name}' },
+    batchAdded:         { zh: '已加入 {n} 个文件', en: '{n} file(s) added' },
+    batchNoImage:       { zh: '未识别到图片文件', en: 'No image files found' },
+    batchQueueEmpty:    { zh: '队列为空',   en: 'Queue is empty' },
+    batchRunningWarn:   { zh: '正在处理，请先暂停或取消', en: 'Still processing — pause or cancel first' },
+    batchPacking:       { zh: '正在打包 {n} 个结果…', en: 'Zipping {n} result(s)…' },
+    batchPackDone:      { zh: '打包完成',   en: 'ZIP ready' },
+    batchPackFail:      { zh: '打包失败：{err}', en: 'Failed to zip: {err}' },
+    batchNoPack:        { zh: '没有已完成的结果可打包', en: 'No finished results to zip' },
+    batchCancelInfo:    { zh: '已取消，完成 {n} 个', en: 'Cancelled, {n} completed' },
+    batchPauseInfo:     { zh: '已暂停',     en: 'Paused' },
+    batchPauseWait:     { zh: '将在当前任务完成后暂停', en: 'Will pause after the current image' },
+    batchFinishInfo:    { zh: '队列处理完毕：成功 {n} 个', en: 'Queue finished: {n} succeeded' },
+    batchFinishErr:     { zh: '，失败 {n} 个', en: ', {n} failed' },
+    batchCleaned:       { zh: '已清理已完成的任务', en: 'Finished tasks cleared' },
+    batchScaledNote:    { zh: '原图 {w}×{h}，已缩至上限内', en: 'Downscaled from {w}×{h}' },
+    batchScaledTag:     { zh: '（已缩放）', en: ' (resized)' },
+    batchErrTimeout:    { zh: '单张超过 {n} 秒未完，已跳过', en: 'Timed out after {n}s, skipped' },
+    batchErrCancel:     { zh: '已取消',     en: 'Cancelled' },
+    batchErrNoCore:     { zh: '降噪核心未就绪', en: 'Denoise engine not ready' },
+    batchErrExport:     { zh: '结果导出失败', en: 'Failed to export result' },
+    batchErrDecode:     { zh: '图片解码失败', en: 'Failed to decode image' },
+    batchErrRead:       { zh: '文件读取失败', en: 'Failed to read file' },
+    batchLogScaled:     { zh: '缩放',       en: 'Resized' },
+    batchLogYes:        { zh: '是（原 {w}×{h}）', en: 'yes (from {w}×{h})' },
+    batchLogNo:         { zh: '否',         en: 'no' },
+
+    /* ───────── 图像编辑 ───────── */
+    editorTitle:        { zh: '图像编辑',   en: 'Image Editor' },
+    editorSub:          { zh: '裁剪、旋转翻转、亮度对比度饱和度调整与锐化，实时预览，可导出或存入档案库。在预览图上点击可移动裁剪框中心。',
+                          en: 'Crop, rotate, flip, adjust brightness/contrast/saturation and sharpen — all with live preview. Export or save to Archive. Click the preview to move the crop center.' },
+    editorDropHint:     { zh: '点击或拖拽图片到此处开始编辑', en: 'Click or drag an image here to start editing' },
+    editorCrop:         { zh: '裁剪',       en: 'Crop' },
+    editorRatio:        { zh: '比例',       en: 'Ratio' },
+    editorRatioOrigin:  { zh: '原图比例',   en: 'Original' },
+    editorFraming:      { zh: '取景',       en: 'Framing' },
+    editorRotateFlip:   { zh: '旋转与翻转', en: 'Rotate & Flip' },
+    editorAngle:        { zh: '角度',       en: 'Angle' },
+    editorFlipH:        { zh: '水平翻转',   en: 'Flip H' },
+    editorFlipV:        { zh: '垂直翻转',   en: 'Flip V' },
+    editorColor:        { zh: '色彩调整',   en: 'Color' },
+    editorBrightness:   { zh: '亮度',       en: 'Brightness' },
+    editorContrast:     { zh: '对比',       en: 'Contrast' },
+    editorSaturation:   { zh: '饱和',       en: 'Saturation' },
+    editorSharpen:      { zh: '锐化',       en: 'Sharpen' },
+    editorPreset:       { zh: '预设风格',   en: 'Presets' },
+    editorPresetNone:   { zh: '不使用',     en: 'None' },
+    editorPresetVivid:  { zh: '鲜艳',       en: 'Vivid' },
+    editorPresetMono:   { zh: '黑白',       en: 'Mono' },
+    editorPresetRetro:  { zh: '复古',       en: 'Retro' },
+    editorOutput:       { zh: '输出',       en: 'Output' },
+    editorBtnExport:    { zh: '导出图片',   en: 'Export' },
+    editorBtnArchive:   { zh: '存档案库',   en: 'To Archive' },
+    editorBtnChange:    { zh: '更换图片',   en: 'Change' },
+    editorBtnReset:     { zh: '重置参数',   en: 'Reset' },
+    editorResetInfo:    { zh: '已恢复初始参数', en: 'Parameters reset' },
+    editorInfo:         { zh: '输出尺寸 {w} × {h}（原图 {ow} × {oh}）· 本次渲染 {ms} ms',
+                          en: 'Output {w} × {h} (source {ow} × {oh}) · rendered in {ms} ms' },
+    editorExported:     { zh: '已导出图片', en: 'Image exported' },
+    editorNoArchive:    { zh: '档案库模块未加载', en: 'Archive module not loaded' },
+    editorNoImage:      { zh: '没有可导出的图像', en: 'No image to export' },
+    editorLogCrop:      { zh: '裁剪',       en: 'Crop' },
+    editorLogRotate:    { zh: '旋转',       en: 'Rotate' },
+    editorLogFlip:      { zh: '翻转',       en: 'Flip' },
+    editorLogDegree:    { zh: '{n}°',       en: '{n}°' },
+    editorLogFlipNone:  { zh: '无',         en: 'none' },
+    editorLogPreset:    { zh: '预设',       en: 'Preset' },
+    editorLogImportSrc: { zh: '编辑器导入', en: 'Editor import' },
+
+    /* ───────── 处理日志 ───────── */
+    historyTitle:       { zh: '处理日志',   en: 'Activity Log' },
+    historySub:         { zh: '自动记录每一次处理的时间、参数与耗时，可筛选、搜索、导出 CSV，便于回溯与统计。',
+                          en: 'Every operation is logged with time, parameters and duration. Filter, search and export to CSV for review and statistics.' },
+    logStatTotal:       { zh: '总记录',     en: 'Records' },
+    logStatSuccess:     { zh: '成功',       en: 'Success' },
+    logStatFailed:      { zh: '失败',       en: 'Failed' },
+    logStatAvg:         { zh: '平均耗时',   en: 'Avg time' },
+    logStatPixels:      { zh: '累计像素',   en: 'Total pixels' },
+    logTabAllTypes:     { zh: '全部类型',   en: 'All types' },
+    logTabDenoise:      { zh: '图像降噪',   en: 'Denoise' },
+    logTabBatch:        { zh: '批量处理',   en: 'Batch' },
+    logTabEdit:         { zh: '图像编辑',   en: 'Edit' },
+    logTabImport:       { zh: '图片导入',   en: 'Import' },
+    logTabAllStatus:    { zh: '全部状态',   en: 'All status' },
+    logSearchPh:        { zh: '搜索文件名或参数…', en: 'Search name or parameters…' },
+    logBtnRefresh:      { zh: '刷新',       en: 'Refresh' },
+    logBtnExport:       { zh: '导出 CSV',   en: 'Export CSV' },
+    logBtnClear:        { zh: '清空',       en: 'Clear' },
+    logEmpty:           { zh: '暂无处理记录，去处理一张图片试试', en: 'No records yet — process an image first' },
+    logTypeDenoise:     { zh: '图像降噪',   en: 'Denoise' },
+    logTypeEdit:        { zh: '图像编辑',   en: 'Edit' },
+    logTypeBatch:       { zh: '批量处理',   en: 'Batch' },
+    logTypeImport:      { zh: '图片导入',   en: 'Import' },
+    logTypeOther:       { zh: '其他',       en: 'Other' },
+    logStatusSuccess:   { zh: '成功',       en: 'Success' },
+    logStatusError:     { zh: '失败',       en: 'Failed' },
+    logDelTitle:        { zh: '删除这条记录', en: 'Delete this record' },
+    logNoThumb:         { zh: '无图',       en: 'No image' },
+    logElapsed:         { zh: '耗时 {ms} ms', en: '{ms} ms' },
+    logClearConfirm:    { zh: '确定清空全部 {n} 条处理日志？此操作不可恢复。', en: 'Delete all {n} log records? This cannot be undone.' },
+    logCleared:         { zh: '日志已清空', en: 'Log cleared' },
+    logExported:        { zh: '已导出 {n} 条记录', en: '{n} record(s) exported' },
+    logExportEmpty:     { zh: '没有可导出的记录', en: 'No records to export' },
+    logParamsNone:      { zh: '-',          en: '-' },
+    logCsvNo:           { zh: '序号',       en: 'No.' },
+    logCsvTime:         { zh: '时间',       en: 'Time' },
+    logCsvType:         { zh: '类型',       en: 'Type' },
+    logCsvName:         { zh: '文件名',     en: 'File' },
+    logCsvStatus:       { zh: '状态',       en: 'Status' },
+    logCsvElapsed:      { zh: '耗时(ms)',   en: 'Duration (ms)' },
+    logCsvWidth:        { zh: '宽度',       en: 'Width' },
+    logCsvHeight:       { zh: '高度',       en: 'Height' },
+    logCsvParams:       { zh: '参数',       en: 'Parameters' },
+    logCsvError:        { zh: '错误信息',   en: 'Error' }
   };
 
 
-  /* 获取翻译文本 */
-  function t(key) {
+  /* 获取翻译文本
+   * 支持占位符：t('batchAdded', { n: 3 }) —— 词条中写 {n}
+   * 只传 key 的用法与旧版完全兼容 */
+  function t(key, vars) {
     var entry = dict[key];
     if (!entry) return key;
-    return entry[currentLang] || entry.zh || key;
+    var s = entry[currentLang] || entry.zh || key;
+    if (vars) {
+      Object.keys(vars).forEach(function (k) {
+        s = s.split('{' + k + '}').join(vars[k]);
+      });
+    }
+    return s;
   }
 
   /* 应用语言到 DOM */
@@ -354,6 +532,14 @@ var i18n = (function () {
     // 语言切换后 nav-links 文本宽度变化，重新校准液态玻璃 pill
     if (typeof repositionNavPill === 'function') {
       requestAnimationFrame(repositionNavPill);
+    }
+
+    // 通知各模块重渲染动态生成的内容（任务卡、日志列表、统计数字等）
+    // 静态 DOM 已由上面的 data-i18n 统一处理，这里只补 JS 动态产出的部分
+    if (Array.isArray(window._langChangeHooks)) {
+      window._langChangeHooks.forEach(function (fn) {
+        try { fn(lang); } catch (e) { /* 单个模块出错不影响其它模块 */ }
+      });
     }
   }
 

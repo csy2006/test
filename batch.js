@@ -75,6 +75,12 @@
     if (typeof window.showToast === 'function') window.showToast(msg, type || 'info');
   }
 
+  /** 取翻译文本，支持 {占位符} 替换 */
+  function tr(key, vars) {
+    if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, vars);
+    return key;
+  }
+
   /* ────────── ZIP 打包（store 模式，无压缩） ────────── */
 
   var CRC_TABLE = (function () {
@@ -217,16 +223,16 @@
     });
     if (added) {
       render();
-      toast('已加入 ' + added + ' 个文件', 'success');
+      toast(tr('batchAdded', { n: added }), 'success');
     } else {
-      toast('未识别到图片文件', 'error');
+      toast(tr('batchNoImage'), 'error');
     }
   }
 
   function removeTask(id) {
     var t = findTask(id);
     if (!t) return;
-    if (t.status === 'running') { toast('正在处理，请先暂停或取消', 'error'); return; }
+    if (t.status === 'running') { toast(tr('batchRunningWarn'), 'error'); return; }
     tasks = tasks.filter(function (x) { return x.id !== id; });
     render();
   }
@@ -312,7 +318,7 @@
         t.srcHeight = img.naturalHeight;
         render();
 
-        if (!window.PrismDenDenoise) throw new Error('降噪核心未就绪');
+        if (!window.PrismDenDenoise) throw new Error(tr('batchErrNoCore'));
 
         // 大图保护：超过上限先等比缩小
         var limited = limitSize(srcCanvas, params.maxPixels);
@@ -320,7 +326,7 @@
         t.height = limited.canvas.height;
         t.scaled = limited.scaled;
         if (limited.scaled) {
-          t.note = '原图 ' + t.srcWidth + '×' + t.srcHeight + '，已缩至上限内';
+          t.note = tr('batchScaledNote', { w: t.srcWidth, h: t.srcHeight });
           render();
         }
 
@@ -344,7 +350,7 @@
               if (window.PrismDenDenoise && window.PrismDenDenoise.abort) {
                 window.PrismDenDenoise.abort();
               }
-              rej(new Error('单张超过 ' + params.timeoutSec + ' 秒未完，已跳过'));
+              rej(new Error(tr('batchErrTimeout', { n: params.timeoutSec })));
             }, params.timeoutSec * 1000);
             runPromise.then(function (v) { clearTimeout(timer); res(v); },
                             function (e) { clearTimeout(timer); rej(e); });
@@ -363,7 +369,7 @@
 
         return new Promise(function (res, rej) {
           outCanvas.toBlob(function (b) {
-            b ? res(b) : rej(new Error('结果导出失败'));
+            b ? res(b) : rej(new Error(tr('batchErrExport')));
           }, mime, params.quality);
         }).then(function (blob) {
           t.blob = blob;
@@ -379,7 +385,9 @@
               name: t.name,
             params: {
               sigmaS: params.sigmaS, sigmaR: params.sigmaR, mode: params.mode, format: params.format,
-              缩放: t.scaled ? ('是（原 ' + t.srcWidth + '×' + t.srcHeight + '）') : '否'
+              [tr('batchLogScaled')]: t.scaled
+                ? tr('batchLogYes', { w: t.srcWidth, h: t.srcHeight })
+                : tr('batchLogNo')
             },
             width: t.width, height: t.height,
               elapsed: t.elapsed,
@@ -422,7 +430,7 @@
   async function startQueue() {
     if (running) return;
     var pending = tasks.filter(function (t) { return t.status === 'pending' || t.status === 'error'; });
-    if (!pending.length) { toast('队列为空', 'error'); return; }
+    if (!pending.length) { toast(tr('batchQueueEmpty'), 'error'); return; }
 
     running = true;
     paused = false;
@@ -442,7 +450,7 @@
       t.status = 'running';
       t.error = '';
       t.progress = 0;
-      setQueueInfo('正在处理第 ' + (i + 1) + '/' + tasks.length + ' 张：' + t.name);
+      setQueueInfo(tr('batchProcessing', { i: i + 1, n: tasks.length, name: t.name }));
       render();
 
       await processOne(t, params);
@@ -460,16 +468,17 @@
 
     var doneCount = tasks.filter(function (t) { return t.status === 'done'; }).length;
     var errCount = tasks.filter(function (t) { return t.status === 'error'; }).length;
-    if (cancelFlag) toast('已取消，完成 ' + doneCount + ' 个', 'info');
-    else if (paused) toast('已暂停', 'info');
-    else toast('队列处理完毕：成功 ' + doneCount + ' 个' + (errCount ? '，失败 ' + errCount + ' 个' : ''), 'success');
+    if (cancelFlag) toast(tr('batchCancelInfo', { n: doneCount }), 'info');
+    else if (paused) toast(tr('batchPauseInfo'), 'info');
+    else toast(tr('batchFinishInfo', { n: doneCount }) +
+      (errCount ? tr('batchFinishErr', { n: errCount }) : ''), 'success');
   }
 
   function pauseQueue() {
     if (!running) return;
     paused = true;
     syncButtons();
-    toast('将在当前任务完成后暂停', 'info');
+    toast(tr('batchPauseWait'), 'info');
   }
 
   function cancelQueue() {
@@ -497,10 +506,17 @@
 
   /* ────────── 渲染 ────────── */
 
-  var STATUS_TEXT = {
-    pending: '等待中', running: '处理中', done: '已完成',
-    error: '失败', cancelled: '已取消'
-  };
+  /* 状态文案：每次渲染时现取，保证跟随当前语言 */
+  function statusText(status) {
+    var map = {
+      pending: 'batchStatusPending',
+      running: 'batchStatusRunning',
+      done: 'batchStatusDone',
+      error: 'batchStatusError',
+      cancelled: 'batchStatusCancel'
+    };
+    return tr(map[status] || 'batchStatusPending');
+  }
 
   function updateTaskNode(t) {
     var node = el.list.querySelector('[data-id="' + t.id + '"]');
@@ -508,7 +524,7 @@
     var bar = node.querySelector('.batch-task-bar-fill');
     var txt = node.querySelector('.batch-task-status');
     if (bar) bar.style.width = t.progress + '%';
-    if (txt) txt.textContent = STATUS_TEXT[t.status] + (t.progress && t.status === 'running' ? ' ' + t.progress + '%' : '');
+    if (txt) txt.textContent = statusText(t.status) + (t.progress && t.status === 'running' ? ' ' + t.progress + '%' : '');
   }
 
   function render() {
@@ -532,16 +548,16 @@
 
       var actions = '';
       if (t.status === 'done') {
-        actions += '<button class="batch-btn-mini" data-act="download">下载</button>';
+        actions += '<button class="batch-btn-mini" data-act="download">' + tr('batchActDownload') + '</button>';
         if (window.PrismDenArchive) {
-          actions += '<button class="batch-btn-mini" data-act="archive">存档案</button>';
+          actions += '<button class="batch-btn-mini" data-act="archive">' + tr('batchActArchive') + '</button>';
         }
       }
       if (t.status === 'error') {
-        actions += '<button class="batch-btn-mini" data-act="retry">重试</button>';
+        actions += '<button class="batch-btn-mini" data-act="retry">' + tr('batchActRetry') + '</button>';
       }
       if (t.status !== 'running') {
-        actions += '<button class="batch-btn-mini danger" data-act="remove">移除</button>';
+        actions += '<button class="batch-btn-mini danger" data-act="remove">' + tr('batchActRemove') + '</button>';
       }
 
       card.innerHTML =
@@ -549,10 +565,10 @@
         '<div class="batch-task-body">' +
           '<div class="batch-task-name" title="' + t.name + '">' + t.name + '</div>' +
           '<div class="batch-task-meta">' +
-            '<span class="batch-task-status">' + STATUS_TEXT[t.status] +
+            '<span class="batch-task-status">' + statusText(t.status) +
               (t.status === 'running' && t.progress ? ' ' + t.progress + '%' : '') + '</span>' +
             '<span>' + fmtBytes(t.size) + '</span>' +
-            (t.width ? '<span>' + t.width + '×' + t.height + (t.scaled ? '（已缩放）' : '') + '</span>' : '') +
+            (t.width ? '<span>' + t.width + '×' + t.height + (t.scaled ? tr('batchScaledTag') : '') + '</span>' : '') +
             '<span class="batch-task-time">' + fmtTime(t.elapsed) + '</span>' +
             (t.note ? '<span>' + t.note + '</span>' : '') +
             (t.error ? '<span class="batch-task-err">' + t.error + '</span>' : '') +
@@ -591,11 +607,11 @@
     var pct = total ? Math.round(((done + err) / total) * 100) : 0;
 
     el.summary.innerHTML =
-      '<div class="batch-stat"><span class="batch-stat-num">' + total + '</span><span>总任务</span></div>' +
-      '<div class="batch-stat ok"><span class="batch-stat-num">' + done + '</span><span>已完成</span></div>' +
-      '<div class="batch-stat err"><span class="batch-stat-num">' + err + '</span><span>失败</span></div>' +
-      '<div class="batch-stat"><span class="batch-stat-num">' + pending + '</span><span>等待中</span></div>' +
-      '<div class="batch-stat"><span class="batch-stat-num">' + pct + '%</span><span>总进度</span></div>';
+      '<div class="batch-stat"><span class="batch-stat-num">' + total + '</span><span>' + tr('batchStatTotal') + '</span></div>' +
+      '<div class="batch-stat ok"><span class="batch-stat-num">' + done + '</span><span>' + tr('batchStatDone') + '</span></div>' +
+      '<div class="batch-stat err"><span class="batch-stat-num">' + err + '</span><span>' + tr('batchStatFailed') + '</span></div>' +
+      '<div class="batch-stat"><span class="batch-stat-num">' + pending + '</span><span>' + tr('batchStatPending') + '</span></div>' +
+      '<div class="batch-stat"><span class="batch-stat-num">' + pct + '%</span><span>' + tr('batchStatProgress') + '</span></div>';
 
     if (el.overallBar) el.overallBar.style.width = pct + '%';
   }
@@ -608,24 +624,24 @@
     if (el.btnStart) el.btnStart.disabled = running;
     if (el.btnPause) el.btnPause.disabled = !running;
     if (el.btnCancel) el.btnCancel.disabled = !running;
-    if (el.btnStart) el.btnStart.textContent = running ? '处理中…' : '开始处理';
+    if (el.btnStart) el.btnStart.textContent = running ? tr('batchBtnRunning') : tr('batchBtnStart');
   }
 
   /* ────────── 打包下载 ────────── */
 
   function packAndDownload() {
     var done = tasks.filter(function (t) { return t.status === 'done' && t.blob; });
-    if (!done.length) { toast('没有已完成的结果可打包', 'error'); return; }
-    toast('正在打包 ' + done.length + ' 个结果…', 'info');
+    if (!done.length) { toast(tr('batchNoPack'), 'error'); return; }
+    toast(tr('batchPacking', { n: done.length }), 'info');
 
     buildZip(done.map(function (t) { return { name: t.outName, blob: t.blob }; }))
       .then(function (zip) {
         var stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
         downloadBlob(zip, 'PrismDen_批量结果_' + stamp + '.zip');
-        toast('打包完成', 'success');
+        toast(tr('batchPackDone'), 'success');
       })
       .catch(function (err) {
-        toast('打包失败：' + (err.message || err), 'error');
+        toast(tr('batchPackFail', { err: err.message || err }), 'error');
       });
   }
 
@@ -691,7 +707,7 @@
     if (el.btnPack) el.btnPack.addEventListener('click', packAndDownload);
     if (el.btnClear) el.btnClear.addEventListener('click', function () {
       clearFinished();
-      toast('已清理已完成的任务', 'info');
+      toast(tr('batchCleaned'), 'info');
     });
 
     // 参数联动显示
@@ -711,6 +727,12 @@
 
     render();
     syncButtons();
+
+    // 语言切换后重渲染任务卡与统计（这些是 JS 动态生成的）
+    (window._langChangeHooks = window._langChangeHooks || []).push(function () {
+      render();
+      syncButtons();
+    });
   }
 
   window.PrismDenBatch = {

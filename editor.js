@@ -14,6 +14,16 @@
   var defaultParams = null;
   var el = {};
 
+  /** 取翻译文本，支持 {占位符} 替换 */
+  function tr(key, vars) {
+    if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, vars);
+    return key;
+  }
+
+  function toast(msg, type) {
+    if (typeof window.showToast === 'function') window.showToast(msg, type || 'info');
+  }
+
   /* ────────── 参数默认值 ────────── */
 
   function makeDefaultParams() {
@@ -218,9 +228,11 @@
 
     var info = document.getElementById('editorInfo');
     if (info) {
-      info.textContent = '输出尺寸 ' + geo.width + ' × ' + geo.height +
-        '（原图 ' + srcCanvas.width + ' × ' + srcCanvas.height + '）· 本次渲染 ' +
-        Math.round(performance.now() - started) + ' ms';
+      info.textContent = tr('editorInfo', {
+        w: geo.width, h: geo.height,
+        ow: srcCanvas.width, oh: srcCanvas.height,
+        ms: Math.round(performance.now() - started)
+      });
     }
   }
 
@@ -253,12 +265,12 @@
             type: 'import', name: file.name,
             width: img.naturalWidth, height: img.naturalHeight,
             status: 'success', elapsed: 0,
-            params: { 来源: '编辑器导入' }
+            params: { source: tr('editorLogImportSrc') }
           });
         }
       };
       img.onerror = function () {
-        if (typeof window.showToast === 'function') window.showToast('图片解码失败', 'error');
+        toast(tr('batchErrDecode'), 'error');
       };
       img.src = reader.result;
     };
@@ -313,11 +325,11 @@
 
   function exportBlob() {
     return new Promise(function (resolve, reject) {
-      if (!workCanvas) { reject(new Error('没有可导出的图像')); return; }
+      if (!workCanvas) { reject(new Error(tr('editorNoImage'))); return; }
       var fmt = document.getElementById('editorFormat').value;
       var mime = fmt === 'jpeg' ? 'image/jpeg' : fmt === 'webp' ? 'image/webp' : 'image/png';
       workCanvas.toBlob(function (b) {
-        b ? resolve(b) : reject(new Error('导出失败'));
+        b ? resolve(b) : reject(new Error(tr('batchErrExport')));
       }, mime, 0.95);
     });
   }
@@ -333,13 +345,18 @@
     window.PrismDenLog.add({
       type: 'edit',
       name: document.getElementById('editorFileName').textContent || '编辑结果',
-      params: {
-        裁剪: params.cropRatio, 旋转: params.rotate + '°',
-        翻转: (params.flipH ? 'H' : '') + (params.flipV ? 'V' : '') || '无',
-        亮度: params.brightness, 对比度: params.contrast,
-        饱和度: params.saturation, 锐化: params.sharpen,
-        预设: params.preset
-      },
+      params: (function () {
+        var p = {};
+        p[tr('editorLogCrop')] = params.cropRatio;
+        p[tr('editorLogRotate')] = tr('editorLogDegree', { n: params.rotate });
+        p[tr('editorLogFlip')] = (params.flipH ? 'H' : '') + (params.flipV ? 'V' : '') || tr('editorLogFlipNone');
+        p[tr('editorBrightness')] = params.brightness;
+        p[tr('editorContrast')] = params.contrast;
+        p[tr('editorSaturation')] = params.saturation;
+        p[tr('editorSharpen')] = params.sharpen;
+        p[tr('editorLogPreset')] = params.preset;
+        return p;
+      })(),
       width: workCanvas ? workCanvas.width : 0,
       height: workCanvas ? workCanvas.height : 0,
       elapsed: elapsed,
@@ -441,7 +458,7 @@
         params = JSON.parse(JSON.stringify(defaultParams));
         syncControls();
         render();
-        if (typeof window.showToast === 'function') window.showToast('已恢复初始参数', 'info');
+        toast(tr('editorResetInfo'), 'info');
       });
     }
 
@@ -460,10 +477,10 @@
           document.body.removeChild(a);
           setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
           logEdit('success', Math.round(performance.now() - t0));
-          if (typeof window.showToast === 'function') window.showToast('已导出图片', 'success');
+          toast(tr('editorExported'), 'success');
         }).catch(function (err) {
           logEdit('error', Math.round(performance.now() - t0), err.message);
-          if (typeof window.showToast === 'function') window.showToast(err.message, 'error');
+          toast(err.message, 'error');
         });
       });
     }
@@ -475,17 +492,17 @@
         var t0 = performance.now();
         exportBlob().then(function (blob) {
           if (!window.PrismDenArchive) {
-            if (typeof window.showToast === 'function') window.showToast('档案库模块未加载', 'error');
+            toast(tr('editorNoArchive'), 'error');
             return;
           }
           return window.PrismDenArchive.save(blob, {
             name: currentOutName(), source: 'edit', tags: ['编辑']
           }).then(function () {
             logEdit('success', Math.round(performance.now() - t0));
-            if (typeof window.showToast === 'function') window.showToast('已存入档案库', 'success');
+            toast(tr('archSaved'), 'success');
           });
         }).catch(function (err) {
-          if (typeof window.showToast === 'function') window.showToast(err.message, 'error');
+          toast(err.message, 'error');
         });
       });
     }
@@ -504,6 +521,11 @@
   window.PrismDenEditor = {
     hasImage: function () { return !!srcCanvas; }
   };
+
+  // 语言切换后刷新尺寸信息文案（若已有图片）
+  (window._langChangeHooks = window._langChangeHooks || []).push(function () {
+    if (srcCanvas) render();
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

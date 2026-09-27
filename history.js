@@ -18,6 +18,16 @@
 
   var el = {};
 
+  /** 取翻译文本，支持 {占位符} 替换 */
+  function tr(key, vars) {
+    if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, vars);
+    return key;
+  }
+
+  function toast(msg, type) {
+    if (typeof window.showToast === 'function') window.showToast(msg, type || 'info');
+  }
+
   /* ────────── IndexedDB ────────── */
 
   function openDB() {
@@ -135,10 +145,15 @@
 
   /* ────────── 渲染 ────────── */
 
-  var TYPE_TEXT = {
-    denoise: '图像降噪', edit: '图像编辑', batch: '批量处理',
-    import: '图片导入', other: '其他'
+  /* 类型文案：每次渲染时现取，保证跟随当前语言 */
+  var TYPE_KEY = {
+    denoise: 'logTypeDenoise', edit: 'logTypeEdit', batch: 'logTypeBatch',
+    import: 'logTypeImport', other: 'logTypeOther'
   };
+
+  function typeText(type) {
+    return tr(TYPE_KEY[type] || 'logTypeOther');
+  }
 
   function fmtDateTime(ts) {
     var d = new Date(ts);
@@ -148,14 +163,14 @@
   }
 
   function fmtParams(params) {
-    if (!params) return '-';
+    if (!params) return tr('logParamsNone');
     var parts = [];
     Object.keys(params).forEach(function (k) {
       var v = params[k];
       if (v === '' || v === null || typeof v === 'undefined') return;
       parts.push(k + '=' + v);
     });
-    return parts.length ? parts.join(' · ') : '-';
+    return parts.length ? parts.join(' · ') : tr('logParamsNone');
   }
 
   function render() {
@@ -177,26 +192,26 @@
 
       var thumbHtml = r.thumb
         ? '<img src="' + r.thumb + '" alt="" />'
-        : '<div class="log-thumb-ph">无图</div>';
+        : '<div class="log-thumb-ph">' + tr('logNoThumb') + '</div>';
 
       item.innerHTML =
         '<div class="log-thumb">' + thumbHtml + '</div>' +
         '<div class="log-main">' +
           '<div class="log-line1">' +
-            '<span class="log-type">' + (TYPE_TEXT[r.type] || r.type) + '</span>' +
+            '<span class="log-type">' + typeText(r.type) + '</span>' +
             '<span class="log-name" title="' + r.name + '">' + r.name + '</span>' +
-            '<span class="log-status">' + (r.status === 'success' ? '成功' : '失败') + '</span>' +
+            '<span class="log-status">' + (r.status === 'success' ? tr('logStatusSuccess') : tr('logStatusError')) + '</span>' +
           '</div>' +
           '<div class="log-line2">' +
             '<span>' + fmtDateTime(r.createdAt) + '</span>' +
             (r.width ? '<span>' + r.width + '×' + r.height + '</span>' : '') +
-            (r.elapsed ? '<span>耗时 ' + r.elapsed + ' ms</span>' : '') +
+            (r.elapsed ? '<span>' + tr('logElapsed', { ms: r.elapsed }) + '</span>' : '') +
           '</div>' +
           '<div class="log-line3">' + fmtParams(r.params) +
             (r.error ? ' <span class="log-err">（' + r.error + '）</span>' : '') +
           '</div>' +
         '</div>' +
-        '<button class="log-del" title="删除这条记录">×</button>';
+        '<button class="log-del" title="' + tr('logDelTitle') + '">×</button>';
 
       item.querySelector('.log-del').addEventListener('click', function (e) {
         e.stopPropagation();
@@ -222,11 +237,11 @@
     var pixels = cache.reduce(function (s, r) { return s + (r.width && r.height ? r.width * r.height : 0); }, 0);
 
     el.stats.innerHTML =
-      '<div class="log-stat"><span class="log-stat-num">' + total + '</span><span>总记录</span></div>' +
-      '<div class="log-stat ok"><span class="log-stat-num">' + ok + '</span><span>成功</span></div>' +
-      '<div class="log-stat err"><span class="log-stat-num">' + err + '</span><span>失败</span></div>' +
-      '<div class="log-stat"><span class="log-stat-num">' + avg + '<i>ms</i></span><span>平均耗时</span></div>' +
-      '<div class="log-stat"><span class="log-stat-num">' + (pixels / 1e6).toFixed(1) + '<i>MP</i></span><span>累计像素</span></div>';
+      '<div class="log-stat"><span class="log-stat-num">' + total + '</span><span>' + tr('logStatTotal') + '</span></div>' +
+      '<div class="log-stat ok"><span class="log-stat-num">' + ok + '</span><span>' + tr('logStatSuccess') + '</span></div>' +
+      '<div class="log-stat err"><span class="log-stat-num">' + err + '</span><span>' + tr('logStatFailed') + '</span></div>' +
+      '<div class="log-stat"><span class="log-stat-num">' + avg + '<i>ms</i></span><span>' + tr('logStatAvg') + '</span></div>' +
+      '<div class="log-stat"><span class="log-stat-num">' + (pixels / 1e6).toFixed(1) + '<i>MP</i></span><span>' + tr('logStatPixels') + '</span></div>';
   }
 
   /* ────────── CSV 导出 ────────── */
@@ -234,7 +249,7 @@
   function exportCSV() {
     var rows = filtered();
     if (!rows.length) {
-      if (typeof window.showToast === 'function') window.showToast('没有可导出的记录', 'error');
+      toast(tr('logExportEmpty'), 'error');
       return;
     }
 
@@ -243,16 +258,19 @@
       return '"' + s.replace(/"/g, '""') + '"';
     }
 
-    var head = ['序号', '时间', '类型', '文件名', '状态', '耗时(ms)', '宽度', '高度', '参数', '错误信息'];
+    var head = [
+      tr('logCsvNo'), tr('logCsvTime'), tr('logCsvType'), tr('logCsvName'), tr('logCsvStatus'),
+      tr('logCsvElapsed'), tr('logCsvWidth'), tr('logCsvHeight'), tr('logCsvParams'), tr('logCsvError')
+    ];
     var lines = [head.map(esc).join(',')];
 
     rows.forEach(function (r, i) {
       lines.push([
         i + 1,
         fmtDateTime(r.createdAt),
-        TYPE_TEXT[r.type] || r.type,
+        typeText(r.type),
         r.name,
-        r.status === 'success' ? '成功' : '失败',
+        r.status === 'success' ? tr('logStatusSuccess') : tr('logStatusError'),
         r.elapsed || 0,
         r.width || '',
         r.height || '',
@@ -273,9 +291,7 @@
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
 
-    if (typeof window.showToast === 'function') {
-      window.showToast('已导出 ' + rows.length + ' 条记录', 'success');
-    }
+    toast(tr('logExported', { n: rows.length }), 'success');
   }
 
   /* ────────── 初始化 ────────── */
@@ -325,16 +341,19 @@
     if (el.btnClear) {
       el.btnClear.addEventListener('click', function () {
         if (!cache.length) return;
-        if (!window.confirm('确定清空全部 ' + cache.length + ' 条处理日志？此操作不可恢复。')) return;
+        if (!window.confirm(tr('logClearConfirm', { n: cache.length }))) return;
         dbClear().then(function () {
           cache = [];
           render();
-          if (typeof window.showToast === 'function') window.showToast('日志已清空', 'info');
+          toast(tr('logCleared'), 'info');
         });
       });
     }
 
     refresh();
+
+    // 语言切换后重渲染日志列表与统计
+    (window._langChangeHooks = window._langChangeHooks || []).push(function () { render(); });
   }
 
   /* 对外 API：其他模块调用 add() 写日志 */
