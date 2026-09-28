@@ -6,11 +6,9 @@
  * 权利取得方式：原始取得  权利范围：全部权利
  */
 
-
 .archive-main {
   max-width: 1200px;
 }
-
 .archive-header {
   display: flex;
   align-items: flex-end;
@@ -19,7 +17,6 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
-
 .archive-title {
   font-family: var(--font-display);
   font-size: 2rem;
@@ -28,30 +25,25 @@
   letter-spacing: -0.02em;
   margin-bottom: 0.25rem;
 }
-
 .archive-subtitle {
   font-size: 0.875rem;
   color: var(--ink-faded);
   font-weight: 300;
 }
-
 .archive-header-actions {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
 }
-
 .archive-storage {
   font-size: 0.75rem;
   color: var(--stone);
   letter-spacing: 0.02em;
 }
-
 .archive-danger {
   color: #a33a2a;
 }
-
 .archive-toolbar {
   display: flex;
   align-items: center;
@@ -60,7 +52,6 @@
   padding: 0.8rem 1rem;
   margin-bottom: 1.5rem;
 }
-
 .archive-search {
   flex: 1 1 180px;
   min-width: 150px;
@@ -73,11 +64,9 @@
   outline: none;
   transition: border-color var(--transition);
 }
-
 .archive-search:focus {
   border-color: var(--orange);
 }
-
 .archive-tabs {
   position: relative;
   display: flex;
@@ -86,7 +75,6 @@
   background: var(--orange-ghost);
   border-radius: 100px;
 }
-
 .archive-tab {
   position: relative;
   z-index: 1;
@@ -100,12 +88,10 @@
   transition: color var(--transition);
   white-space: nowrap;
 }
-
 .archive-tab.active {
   color: var(--ink);
   font-weight: 500;
 }
-
 .archive-tab-pill {
   position: absolute;
   top: 3px;
@@ -118,7 +104,6 @@
   transition: transform 0.25s ease, width 0.25s ease;
   pointer-events: none;
 }
-
 .archive-fav-toggle {
   display: flex;
   align-items: center;
@@ -132,23 +117,19 @@
   cursor: pointer;
   transition: all var(--transition);
 }
-
 .archive-fav-toggle svg {
   width: 15px;
   height: 15px;
 }
-
 .archive-fav-toggle:hover {
   color: var(--orange);
   border-color: var(--orange);
 }
-
 .archive-fav-toggle.active {
   color: var(--orange);
   border-color: var(--orange);
   background: var(--orange-ghost);
 }
-
 .archive-sort {
   padding: 0.45rem 0.7rem;
   font-size: 0.8rem;
@@ -159,7 +140,6 @@
   outline: none;
   cursor: pointer;
 }
-
 .archive-empty {
   display: none;
   flex-direction: column;
@@ -169,31 +149,26 @@
   text-align: center;
   color: var(--stone);
 }
-
 .archive-empty.show {
   display: flex;
 }
-
 .archive-empty-title {
   font-size: 1.1rem;
   font-weight: 500;
   color: var(--ink-faded);
   margin-top: 0.8rem;
 }
-
 .archive-empty-hint {
   font-size: 0.82rem;
   color: var(--stone);
   max-width: 420px;
   line-height: 1.7;
 }
-
 .archive-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.1rem;
 }
-
 .archive-card {
   position: relative;
   overflow: hidden;
@@ -203,12 +178,9 @@
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
 }
-
 .archive-card:hover {
-  transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
-
 .archive-card-thumb {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -216,14 +188,12 @@
   display: block;
   background: var(--orange-ghost);
 }
-
 .archive-card-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 0.8rem;
 }
-
 .archive-card-name {
   flex: 1;
   min-width: 0;
@@ -233,7 +203,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .archive-card-src {
   flex-shrink: 0;
   padding: 0.15rem 0.5rem;
@@ -243,7 +212,6 @@
   background: var(--orange-ghost);
   border-radius: 100px;
 }
-
 .archive-card-fav {
   position: absolute;
   top: 0.5rem;
@@ -257,17 +225,14 @@
   background: rgba(196,104,58,0.9);
   border-radius: 50%;
 }
-
 .archive-card.is-fav .archive-card-fav {
   display: flex;
 }
-
 .archive-card-fav svg {
   width: 13px;
   height: 13px;
   fill: currentColor;
 }
-
 .archive-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -277,13 +242,10 @@
   justify-content: center;
   padding: 2rem;
   background: rgba(30,20,12,0.55);
-  backdrop-filter: blur(4px);
 }
-
 .archive-modal-backdrop.show {
   display: flex;
 }
-
 .archive-modal {
   display: flex;
   position: relative;
@@ -294,7 +256,6 @@
   border-radius: 18px;
   box-shadow: 0 24px 80px rgba(0,0,0,0.25);
 }
-
 .archive-modal-img-wrap {
   flex: 1.4;
   display: flex;
@@ -303,14 +264,12 @@
   min-width: 0;
   background: var(--orange-ghost);
 }
-
 .archive-modal-img-wrap img {
   max-width: 100%;
   max-height: 86vh;
   object-fit: contain;
   display: block;
 }
-
 .archive-modal-side {
   flex: 1;
   display: flex;
@@ -321,20 +280,17 @@
   padding: 1.8rem 1.5rem;
   overflow-y: auto;
 }
-
 .archive-modal-name {
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--ink);
   word-break: break-all;
 }
-
 .archive-modal-meta {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
 }
-
 .archive-meta-row {
   display: flex;
   align-items: center;
@@ -342,30 +298,25 @@
   gap: 0.8rem;
   font-size: 0.8rem;
 }
-
 .archive-meta-row span {
   color: var(--stone);
   flex-shrink: 0;
 }
-
 .archive-meta-row em {
   font-style: normal;
   color: var(--ink);
   text-align: right;
   word-break: break-all;
 }
-
 .archive-modal-tags {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
-
 .archive-modal-tags label {
   font-size: 0.78rem;
   color: var(--stone);
 }
-
 .archive-modal-tags input {
   padding: 0.5rem 0.8rem;
   font-size: 0.82rem;
@@ -375,25 +326,21 @@
   border-radius: var(--radius-md, 8px);
   outline: none;
 }
-
 .archive-modal-tags input:focus {
   border-color: var(--orange);
 }
-
 .archive-modal-actions {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-top: auto;
 }
-
 .archive-modal-actions .btn {
   flex: 1;
   padding: 0.55rem 0.8rem;
   font-size: 0.8rem;
   white-space: nowrap;
 }
-
 .archive-modal-close {
   position: absolute;
   top: 0.6rem;
@@ -410,7 +357,6 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
-
 .archive-drop-hint {
   position: fixed;
   inset: 0;
@@ -425,48 +371,36 @@
   border: 3px dashed var(--orange);
   pointer-events: none;
 }
-
 .archive-drop-hint.show {
   display: flex;
 }
 
-.archive-save-btn {
-  margin-top: 0.6rem;
-  width: 100%;
-}
-
 @media (max-width: 768px) {
-  .archive-header {
+.archive-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
-  .archive-grid {
+.archive-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 0.8rem;
   }
-
-  .archive-modal {
+.archive-modal {
     flex-direction: column;
     max-height: 92vh;
     overflow-y: auto;
   }
-
-  .archive-modal-img-wrap {
+.archive-modal-img-wrap {
     flex: none;
     max-height: 42vh;
   }
-
-  .archive-modal-img-wrap img {
+.archive-modal-img-wrap img {
     max-height: 42vh;
   }
-
-  .archive-modal-side {
+.archive-modal-side {
     max-width: none;
     padding: 1.2rem 1.1rem;
   }
-
-  .archive-tab {
+.archive-tab {
     padding: 0.38rem 0.65rem;
     font-size: 0.74rem;
   }

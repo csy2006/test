@@ -1,6 +1,6 @@
 <!--
   PrismDen 棱镜降噪图像处理系统 V1.0
-  单页主文档：集成图像降噪、结果输出、批量处理、图像编辑、处理日志、图片档案库六大功能区
+  单页主文档：集成批量降噪、图像编辑、处理日志、图片档案库四大功能区
   著作权人：Young__Yang
   完成日期：2026-09-28
   权利取得方式：原始取得  权利范围：全部权利
@@ -18,14 +18,11 @@
   <link rel="stylesheet" href="archive.css" />
   <link rel="icon" href="./002.jpg" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <script src="exif.js"></script>
 </head>
 <body>
 <header class="topbar">
   <span class="topbar-brand">PrismDen</span>
   <nav class="topbar-nav">
-    <a href="#sec-denoise">图像降噪</a>
-    <a href="#sec-result">降噪结果</a>
     <a href="#sec-batch">批量处理</a>
     <a href="#sec-editor">图像编辑</a>
     <a href="#sec-log">处理日志</a>
@@ -34,252 +31,6 @@
 </header>
 
 <main class="page">
-<section class="sec" id="sec-denoise">
-  <main class="page-main page-main-wide">
-    <div class="upload-params-grid">
-
-      <section class="content-section upload-col">
-        <div class="panel-header">
-          <h2>导入图片</h2>
-        </div>
-
-        <div class="upload-zone glass-card bounce-card" id="uploadZone" style="animation-delay:0s;">
-          <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.raw,.bmp,.tiff,.tif,.webp" hidden />
-          <div class="upload-inner" id="uploadInner">
-            <div class="upload-icon">
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                <path d="M24 10V34M24 10L16 18M24 10L32 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 36H38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <p class="upload-hint">点击导入图片</p>
-            <p class="upload-format">支持 PNG · JPG · JPEG · RAW · BMP · TIFF · WebP</p>
-          </div>
-        </div>
-
-        <div class="preview-block" id="previewBlock">
-          <img id="previewImg" class="preview-img hidden" alt="预览图" />
-          <canvas id="inputCanvas" class="img-canvas hidden"></canvas>
-          <div class="img-actions hidden" id="imgActions">
-            <button class="img-action-btn change" onclick="changeImage()">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M13 2H3L2 5V14H14V5L13 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-                <path d="M8 12V6M8 6L5 9M8 6L11 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>更换照片</span>
-            </button>
-            <button class="img-action-btn remove" onclick="removeImage()">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M5 2L2 5V14H14V5L11 2H5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-                <path d="M6 7L10 11M10 7L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>移除照片</span>
-            </button>
-          </div>
-          <div class="img-meta hidden" id="imgMeta">
-            <div class="meta-row"><span class="meta-key"><span>文件名</span></span><span class="meta-val" id="metaName">--</span></div>
-            <div class="meta-row"><span class="meta-key"><span>格式</span></span><span class="meta-val" id="metaFormat">--</span></div>
-            <div class="meta-row"><span class="meta-key"><span>大小</span></span><span class="meta-val" id="metaBytes">--</span></div>
-            <div class="meta-divider"></div>
-            <div class="meta-sub">相机参数</div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span>相机制造商</span></span><span class="meta-val" id="metaMake">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span>相机型号</span></span><span class="meta-val" id="metaModel">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span>光圈</span></span><span class="meta-val" id="metaAperture">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span>快门</span></span><span class="meta-val" id="metaShutter">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span>ISO</span></span><span class="meta-val" id="metaISO">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span>焦距</span></span><span class="meta-val" id="metaFocal">--</span></div>
-          </div>
-        </div>
-
-      </section>
-
-      <section class="content-section params-col">
-        <div class="panel-header" style="flex-wrap:wrap;">
-          <h2>降噪参数</h2>
-        </div>
-
-        <div class="param-controls glass-card bounce-card" style="animation-delay:1.2s;">
-          <div class="param-group">
-            <label class="param-label">
-              <span>空间半径</span>
-              <span>σₛ = <em id="sigmaS_val">5</em></span>
-            </label>
-            <input type="range" class="slider" id="sigmaS" min="1" max="15" value="5"
-              oninput="document.getElementById('sigmaS_val').textContent=this.value" />
-            <div class="param-scale"><span>1 &mdash; 轻微</span><span>15 &mdash; 强力</span></div>
-          </div>
-
-          <div class="param-group">
-            <label class="param-label">
-              <span>颜色阈值</span>
-              <span>σᵣ = <em id="sigmaR_val">25</em></span>
-            </label>
-            <input type="range" class="slider" id="sigmaR" min="1" max="100" value="25"
-              oninput="document.getElementById('sigmaR_val').textContent=this.value" />
-            <div class="param-scale"><span>1 &mdash; 保边</span><span>100 &mdash; 平滑</span></div>
-          </div>
-
-          <div class="param-group">
-            <label class="param-label"><span>降噪模式</span></label>
-            <div class="mode-tabs" id="modeTabs">
-              <button class="mode-tab active" data-mode="bilateral" onclick="selectMode(this)"><span>彩色双边</span></button>
-              <button class="mode-tab" data-mode="grayscale" onclick="selectMode(this)"><span>灰度 Y 通道</span></button>
-              <div class="mode-pill" id="modePill"></div>
-            </div>
-          </div>
-
-          <button class="btn btn-primary btn-process" id="processBtn" onclick="processImage()" disabled>
-            <span class="btn-text">开始图像降噪</span>
-            <div class="btn-spinner hidden" id="btnSpinner"></div>
-          </button>
-
-          <div class="progress-wrap hidden" id="progressWrap">
-            <div class="progress-bar" id="progressBar" style="width:0%"></div>
-            <span class="progress-text" id="progressText">处理中...</span>
-          </div>
-
-          <div class="timing hidden" id="timingBlock">
-            <span class="timing-label"><span>处理耗时</span></span>
-            <span class="timing-val" id="timingVal">-- ms</span>
-          </div>
-        </div>
-      </section>
-
-    </div>
-  </main>
-</section>
-
-<section class="sec" id="sec-result">
-  <main class="page-main" id="mainContent">
-
-    <div class="empty-state glass-card" id="emptyState">
-      <h3>暂无处理结果</h3>
-      <p>请先前往上传处理页面导入图片并进行降噪处理</p>
-      <button class="goto-upload-btn" onclick="location.hash='#sec-denoise'"><span>去上传图片</span></button>
-    </div>
-
-    <div id="resultContent" class="hidden">
-
-      <div class="result-info-bar glass-card bounce-card" id="resultInfoBar" style="animation-delay:0s;">
-        <div class="info-item">
-          <span class="info-label"><span>处理耗时</span></span>
-          <span class="info-val" id="resultTiming">--</span>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-item">
-            <span class="info-label">σₛ <span>空间半径</span></span>
-            <span class="info-val" id="resultSigmaS">--</span>
-          </div>
-          <div class="info-divider"></div>
-          <div class="info-item">
-            <span class="info-label">σᵣ <span>颜色阈值</span></span>
-          <span class="info-val" id="resultSigmaR">--</span>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-item">
-          <span class="info-label"><span>降噪模式</span></span>
-          <span class="info-val" id="resultMode">--</span>
-        </div>
-      </div>
-
-      <div class="result-grid">
-
-        <div class="result-left-col">
-
-          <section class="content-section">
-            <div class="panel-header">
-              <h2>降噪结果</h2>
-            </div>
-            <div class="result-canvas-wrap glass-card bounce-card" style="animation-delay:0.5s;">
-              <canvas id="resultCanvas" class="img-canvas-full"></canvas>
-            </div>
-
-          </section>
-
-          <section class="content-section" style="margin-top:2rem;">
-
-            <div class="save-block glass-card bounce-card" id="saveBlock" style="animation-delay:1.0s;">
-              <div class="save-format-row">
-                <span class="save-label">保存格式</span>
-                <div class="save-format-tabs" id="saveFormatTabs">
-                  <button class="save-fmt-btn active" data-fmt="png" onmouseenter="selectSaveFormat(this)"><span>PNG</span></button>
-                  <button class="save-fmt-btn" data-fmt="jpeg" onmouseenter="selectSaveFormat(this)"><span>JPEG</span></button>
-                  <button class="save-fmt-btn" data-fmt="webp" onmouseenter="selectSaveFormat(this)"><span>WebP</span></button>
-                  <div class="save-format-pill"></div>
-                </div>
-              </div>
-              <div id="qualityRow" style="display:none; flex-direction:column; gap:8px;">
-                <label class="param-label"><span>压缩质量</span> <em id="qualityVal">92</em>%</label>
-                <input type="range" class="slider" id="qualitySlider" min="60" max="100" value="92"
-                  oninput="document.getElementById('qualityVal').textContent=this.value" />
-              </div>
-              <div class="save-actions" id="saveActions">
-                <button class="save-action-btn" data-action="save" onmouseenter="selectSaveAction(this)"><span>保存图片</span></button>
-                <button class="save-action-btn" data-action="new" onmouseenter="selectSaveAction(this)"><span>处理新图片</span></button>
-                <div class="save-action-pill"></div>
-              </div>
-              <button class="save-confirm-btn" id="saveConfirmBtn" onclick="executeSaveAction()"><span>确定</span></button>
-              <button class="btn btn-ghost archive-save-btn" id="archiveResultBtn" onclick="archiveCurrentResult()"><span>存入档案库</span></button>
-            </div>
-          </section>
-        </div>
-
-        <section class="content-section result-right-col">
-          <div class="panel-header">
-            <h2><span>照片信息</span></h2>
-          </div>
-          <div class="photo-info glass-card bounce-card" id="photoInfoBlock" style="animation-delay:0.8s;">
-
-            <div class="info-sub-header">相机参数</div>
-            <div class="info-row">
-              <span class="info-key"><span>相机制造商</span></span>
-              <span class="info-val" id="infoMake">--</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key"><span>相机型号</span></span>
-              <span class="info-val" id="infoModel">--</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key"><span>光圈</span></span>
-              <span class="info-val" id="infoAperture">--</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key"><span>快门</span></span>
-              <span class="info-val" id="infoShutter">--</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key"><span>ISO</span></span>
-              <span class="info-val" id="infoISO">--</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key"><span>焦距</span></span>
-              <span class="info-val" id="infoFocal">--</span>
-            </div>
-            <div class="info-divider-row"></div>
-
-            <div class="info-sub-header"><span>文件信息</span></div>
-            <div class="info-row">
-              <span class="info-key">文件大小</span>
-              <span class="info-val" id="infoFileSize">--</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key">文件格式</span>
-              <span class="info-val" id="infoFormat">--</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key"><span>颜色空间</span></span>
-              <span class="info-val" id="infoColorSpace">--</span>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-    </div>
-
-  </main>
-</section>
-
 <section class="sec" id="sec-batch">
   <main class="mod-main">
     <h2 class="mod-title">批量处理</h2>
@@ -593,19 +344,6 @@
 
 <div class="toast-container" id="toastContainer">
   <div class="toast hidden" id="toast"></div>
-</div>
-
-<div class="compare-overlay hidden" id="compareOverlay">
-  <div class="compare-container" id="compareContainer">
-    <canvas id="compareOriginal" class="compare-canvas"></canvas>
-    <div class="compare-result-wrap" id="compareResultWrap">
-      <canvas id="compareResult" class="compare-canvas"></canvas>
-    </div>
-    <div class="compare-divider" id="compareDivider"></div>
-    <span class="compare-badge badge-left"><span>原图</span></span>
-    <span class="compare-badge badge-right"><span>降噪后</span></span>
-    <button class="compare-close" onclick="closeCompare()">&times;</button>
-  </div>
 </div>
 
 <script src="main.js"></script>
