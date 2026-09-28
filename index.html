@@ -1,92 +1,40 @@
+<!--
+  PrismDen 棱镜降噪图像处理系统 V1.0
+  单页主文档：集成图像降噪、结果输出、批量处理、图像编辑、处理日志、图片档案库六大功能区
+  著作权人：Young__Yang
+  完成日期：2026-09-28
+  权利取得方式：原始取得  权利范围：全部权利
+-->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="x5-orientation" content="portrait" />
-  <meta name="x5-fullscreen" content="true" />
-  <meta name="x5-page-mode" content="app" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="renderer" content="webkit" />
   <meta name="color-scheme" content="light" />
-  <title>PrismDen</title>
+  <title>PrismDen 棱镜降噪</title>
   <link rel="stylesheet" href="style.css" />
-
   <link rel="stylesheet" href="modules.css" />
   <link rel="stylesheet" href="archive.css" />
-  <link rel="icon" href="./002.jpg" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700;800;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="icon" href="./002.jpg" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <script src="exif.js"></script>
 </head>
 <body>
+<header class="topbar">
+  <span class="topbar-brand">PrismDen</span>
+  <nav class="topbar-nav">
+    <a href="#sec-denoise">图像降噪</a>
+    <a href="#sec-result">降噪结果</a>
+    <a href="#sec-batch">批量处理</a>
+    <a href="#sec-editor">图像编辑</a>
+    <a href="#sec-log">处理日志</a>
+    <a href="#sec-archive">档案库</a>
+  </nav>
+</header>
 
-<div class="welcome-overlay" id="welcomeOverlay" onclick="var o=this;if(o._d)return;o._d=1;o.style.pointerEvents='none';o.classList.add('fade-out');var h=document.getElementById('page-home');if(h){var e=h.querySelectorAll('.hero-kanji,.word,.hero-subtitle,.hero-actions');for(var i=0;i<e.length;i++){e[i].style.animation='none';e[i].offsetHeight;e[i].style.animation=''}}setTimeout(function(){o.remove();var n=document.querySelector('.nav-link[data-page=home]');if(n)n.classList.add('active')},600)">
-  <div class="welcome-bg-circle welcome-bg-circle-1"></div>
-  <div class="welcome-bg-circle welcome-bg-circle-2"></div>
-  <div class="welcome-bg-circle welcome-bg-circle-3"></div>
-  <div class="welcome-content">
-    <div class="welcome-logo">PrismDen</div>
-    <div class="welcome-subtitle">棱镜降噪 · 图像降噪处理平台</div>
-  </div>
-    <div class="welcome-hint" id="welcomeHint">点击任意位置进入</div>
-  </div>
-</div>
-
-<div class="bg-animation">
-  <div class="bg-circle bg-circle-1"></div>
-  <div class="bg-circle bg-circle-2"></div>
-  <div class="bg-circle bg-circle-3"></div>
-</div>
-
-<nav class="navbar" id="navbar">
-  <div class="nav-brand" id="navBrand">
-    <div class="nav-brand-row">
-      <img src="002.jpg" class="nav-icon" onclick="switchPage('home')" style="cursor:pointer;width:22px;height:22px;" alt="logo">
-      <span class="nav-title"><a href="#" onclick="switchPage('home'); return false;"><em>PrismDen -- Young__Yang</em></a></span>
-    </div>
-  </div>
-  <div class="nav-links" id="navLinks">
-    <span class="nav-link active" data-page="home">首页</span>
-    <span class="nav-link" data-page="upload">图像降噪</span>
-    <span class="nav-link" data-page="result">降噪结果</span>
-    <span class="nav-link" data-page="batch">批量处理</span>
-    <span class="nav-link" data-page="editor">图像编辑</span>
-    <span class="nav-link" data-page="history">处理日志</span>
-    <span class="nav-link" data-page="archive">档案库</span>
-  </div>
-
-</nav>
-
-<section class="page-section active" id="page-home" data-page="home">
-
-  <section class="hero">
-    <div class="hero-sketch-bg">
-
-    </div>
-    <div class="hero-inner">
-      <div class="hero-content">
-        <p class="hero-kanji">Image Processing · Young__Yang</p>
-        <h1 class="hero-title">
-
-          <span class="word-wrap"><span class="word"><em>PrismDen</em></span></span>
-        </h1>
-        <p class="hero-subtitle"><span>Hash-Accelerated Bilateral Filtering<br>哈希加速双边滤波图像降噪项目</span></p>
-        <div class="hero-actions">
-          <button class="btn btn-hero-action" onclick="switchPage('upload')">即刻降噪</button>
-        </div>
-      </div>
-    </div>
-    <div class="scroll-hint" onclick="switchPage('upload')" style="cursor:pointer;">
-
-    </div>
-  </section>
-</section>
-
-<section class="page-section" id="page-upload" data-page="upload">
-
+<main class="page">
+<section class="sec" id="sec-denoise">
   <main class="page-main page-main-wide">
     <div class="upload-params-grid">
 
@@ -199,17 +147,15 @@
 
     </div>
   </main>
-
 </section>
 
-<section class="page-section" id="page-result" data-page="result">
-
+<section class="sec" id="sec-result">
   <main class="page-main" id="mainContent">
 
     <div class="empty-state glass-card" id="emptyState">
       <h3>暂无处理结果</h3>
       <p>请先前往上传处理页面导入图片并进行降噪处理</p>
-      <button class="goto-upload-btn" onclick="switchPage('upload')"><span>去上传图片</span></button>
+      <button class="goto-upload-btn" onclick="location.hash='#sec-denoise'"><span>去上传图片</span></button>
     </div>
 
     <div id="resultContent" class="hidden">
@@ -332,10 +278,9 @@
     </div>
 
   </main>
-
 </section>
 
-<section class="page-section" id="page-batch" data-page="batch">
+<section class="sec" id="sec-batch">
   <main class="mod-main">
     <h2 class="mod-title">批量处理</h2>
     <p class="mod-sub">一次导入多张图片排队降噪，可随时暂停、取消、重试失败项，完成后打包下载。大图会自动分块处理。</p>
@@ -426,7 +371,7 @@
   </main>
 </section>
 
-<section class="page-section" id="page-editor" data-page="editor">
+<section class="sec" id="sec-editor">
   <main class="mod-main">
     <h2 class="mod-title">图像编辑</h2>
     <p class="mod-sub">裁剪、旋转翻转、亮度对比度饱和度调整与锐化，实时预览，可导出或存入档案库。在预览图上点击可移动裁剪框中心。</p>
@@ -536,7 +481,7 @@
   </main>
 </section>
 
-<section class="page-section" id="page-history" data-page="history">
+<section class="sec" id="sec-log">
   <main class="mod-main">
     <h2 class="mod-title">处理日志</h2>
     <p class="mod-sub">自动记录每一次处理的时间、参数与耗时，可筛选、搜索、导出 CSV，便于回溯与统计。</p>
@@ -567,7 +512,7 @@
   </main>
 </section>
 
-<section class="page-section" id="page-archive" data-page="archive">
+<section class="sec" id="sec-archive">
   <main class="page-main archive-main">
 
     <div class="archive-header">
@@ -642,7 +587,9 @@
   <div class="archive-drop-hint" id="archiveDropHint">松开鼠标，导入图片</div>
 </section>
 
-<div class="site-footer">© 2026 Young__Yang. All rights reserved.</div>
+</main>
+
+<div class="site-footer">&copy; 2026 Young__Yang. All rights reserved.</div>
 
 <div class="toast-container" id="toastContainer">
   <div class="toast hidden" id="toast"></div>
@@ -660,8 +607,8 @@
     <button class="compare-close" onclick="closeCompare()">&times;</button>
   </div>
 </div>
-<script src="main.js"></script>
 
+<script src="main.js"></script>
 <script src="history.js"></script>
 <script src="batch.js"></script>
 <script src="editor.js"></script>

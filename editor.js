@@ -1,3 +1,10 @@
+/*
+ * PrismDen 棱镜降噪图像处理系统 V1.0
+ * 图像编辑模块：比例裁剪、旋转翻转、亮度对比度饱和度调整、Unsharp Mask 锐化、预设风格
+ * 著作权人：Young__Yang
+ * 完成日期：2026-09-28
+ * 权利取得方式：原始取得  权利范围：全部权利
+ */
 
 (function () {
   'use strict';
@@ -30,7 +37,8 @@
     };
   }
 
-  function cropRect(w, h, p) {
+  /* 裁剪框计算：按目标比例与取景缩放求裁剪区域，支持在预览图上点击移动裁剪中心 */
+function cropRect(w, h, p) {
     var ratioMap = { '1:1': 1, '4:3': 4 / 3, '3:2': 3 / 2, '16:9': 16 / 9 };
     var target = ratioMap[p.cropRatio];
 
@@ -79,7 +87,8 @@
     return out;
   }
 
-  function applyColor(canvas, p) {
+  /* 色彩调整：亮度、对比度、饱和度逐像素映射，含鲜艳/黑白/复古预设 */
+function applyColor(canvas, p) {
     if (!p.brightness && !p.contrast && !p.saturation) return canvas;
 
     var ctx = canvas.getContext('2d');
@@ -120,7 +129,8 @@
     return canvas;
   }
 
-  function applySharpen(canvas, amount) {
+  /* Unsharp Mask 锐化：高斯模糊求低频，原图与低频按权重叠加得到锐化结果 */
+function applySharpen(canvas, amount) {
     if (!amount) return canvas;
 
     var w = canvas.width, h = canvas.height;
@@ -169,7 +179,8 @@
     }
   }
 
-  function render() {
+  /* 渲染管线：裁剪 → 旋转翻转 → 色彩调整 → 锐化，实时输出到预览画布 */
+function render() {
 
     if (!srcCanvas || !params) return;
 
@@ -471,10 +482,6 @@
   window.PrismDenEditor = {
     hasImage: function () { return !!srcCanvas; }
   };
-
-  (window._langChangeHooks = window._langChangeHooks || []).push(function () {
-    if (srcCanvas) render();
-  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

@@ -1,3 +1,10 @@
+/*
+ * PrismDen 棱镜降噪图像处理系统 V1.0
+ * 处理日志模块：基于 IndexedDB 的操作记录、筛选检索、统计与 CSV 导出
+ * 著作权人：Young__Yang
+ * 完成日期：2026-09-28
+ * 权利取得方式：原始取得  权利范围：全部权利
+ */
 
 (function () {
   'use strict';
@@ -10,6 +17,7 @@
   var filterType = 'all';
   var filterStatus = 'all';
   var keyword = '';
+  var _ready = false;
 
   var el = {};
 
@@ -17,7 +25,8 @@
     if (typeof window.showToast === 'function') window.showToast(msg, type || 'info');
   }
 
-  function openDB() {
+  /* IndexedDB 封装：处理日志的持久化读写，含建库、升级与事务管理 */
+function openDB() {
     if (db) return Promise.resolve(db);
     return new Promise(function (resolve, reject) {
       var req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -97,6 +106,8 @@
     cache.unshift(record);
     return dbPut(record).catch(function (e) {
       console.warn('[history] 写入失败', e);
+    }).then(function () {
+      if (_ready) refresh();
     });
   }
 
@@ -220,7 +231,8 @@
       '<div class="log-stat"><span class="log-stat-num">' + (pixels / 1e6).toFixed(1) + '<i>MP</i></span><span>' + '累计像素' + '</span></div>';
   }
 
-  function exportCSV() {
+  /* CSV 导出：带 UTF-8 BOM，保证 Excel 打开中文不乱码 */
+function exportCSV() {
     var rows = filtered();
     if (!rows.length) {
       toast('没有可导出的记录', 'error');
@@ -322,8 +334,7 @@
     }
 
     refresh();
-
-    (window._langChangeHooks = window._langChangeHooks || []).push(function () { render(); });
+    _ready = true;
   }
 
   window.PrismDenLog = {

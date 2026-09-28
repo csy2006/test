@@ -1,3 +1,10 @@
+/*
+ * PrismDen 棱镜降噪图像处理系统 V1.0
+ * 图片档案库模块：基于 IndexedDB 的图像持久化存储、标签管理与导入导出
+ * 著作权人：Young__Yang
+ * 完成日期：2026-09-28
+ * 权利取得方式：原始取得  权利范围：全部权利
+ */
 
 
 (function () {
@@ -18,7 +25,8 @@
   var elModalBytes, elModalDate, elModalTags, elModalFav;
   var elFileInput, elDropHint;
 
-  function openDB() {
+  /* IndexedDB 封装：档案库图片的持久化存储，以 Blob 保存缩略图与原图 */
+function openDB() {
     return new Promise(function (resolve, reject) {
       if (_db) { resolve(_db); return; }
       var req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -319,7 +327,7 @@
       e.target.value = '';
     });
 
-    var section = document.getElementById('page-archive');
+    var section = document.getElementById('sec-archive');
     section.addEventListener('dragenter', function (e) {
       if (e.target.closest('.archive-modal')) return;
       e.preventDefault();

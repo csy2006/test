@@ -1,3 +1,10 @@
+/*
+ * PrismDen 棱镜降噪图像处理系统 V1.0
+ * 批量处理模块：多图任务队列、串行调度、暂停/取消/重试、结果打包下载
+ * 著作权人：Young__Yang
+ * 完成日期：2026-09-28
+ * 权利取得方式：原始取得  权利范围：全部权利
+ */
 
 (function () {
   'use strict';
@@ -86,7 +93,8 @@
     return (c ^ 0xFFFFFFFF) >>> 0;
   }
 
-  function buildZip(entries) {
+  /* ZIP 打包：自行实现 store 模式（无压缩）打包，含本地文件头、目录结束记录与 CRC32 校验 */
+function buildZip(entries) {
     var parts = [];
     var central = [];
     var offset = 0;
@@ -236,7 +244,8 @@
     };
   }
 
-  function limitSize(canvas, maxPixels) {
+  /* 大图保护：超出像素上限时等比缩放，避免单张耗时过长拖住整个队列 */
+function limitSize(canvas, maxPixels) {
     var px = canvas.width * canvas.height;
     if (!maxPixels || px <= maxPixels) return { canvas: canvas, scaled: false, scale: 1 };
 
@@ -253,7 +262,8 @@
     return { canvas: small, scaled: true, scale: scale };
   }
 
-  function processOne(t, params) {
+  /* 单张处理：解码 → 缩放保护 → 调用降噪核心 → 编码输出，含超时跳过与中止信号 */
+function processOne(t, params) {
     return new Promise(function (resolve) {
       var started = performance.now();
       var tickTimer = null;
@@ -680,11 +690,6 @@
 
     render();
     syncButtons();
-
-    (window._langChangeHooks = window._langChangeHooks || []).push(function () {
-      render();
-      syncButtons();
-    });
   }
 
   window.PrismDenBatch = {
