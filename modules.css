@@ -1,10 +1,5 @@
-/* ============================================================
- * modules.css —— 批量处理 / 图像编辑 / 处理日志 三个新增模块共用样式
- * 命名前缀：batch- / editor- / log-
- * 配色沿用项目既有 CSS 变量（--ink / --orange / --cream 等）
- * ============================================================ */
 
-/* ────────── 三模块通用容器 ────────── */
+
 .mod-main {
   max-width: 1080px;
   margin: 0 auto;
@@ -122,8 +117,6 @@
 .mod-hidden {
   display: none !important;
 }
-
-/* ────────── 批量处理 batch ────────── */
 
 .batch-zone {
   border: 2px dashed var(--orange-border, rgba(184, 168, 152, 0.45));
@@ -335,8 +328,6 @@
   cursor: pointer;
 }
 
-/* ────────── 图像编辑 editor ────────── */
-
 .editor-zone {
   border: 2px dashed var(--orange-border, rgba(184, 168, 152, 0.45));
   border-radius: 14px;
@@ -419,8 +410,6 @@
   text-align: center;
   padding-top: 0.3rem;
 }
-
-/* ────────── 处理日志 log ────────── */
 
 .log-toolbar {
   display: flex;
@@ -606,7 +595,6 @@
   color: #c0392b;
 }
 
-/* ────────── 响应式 ────────── */
 @media (max-width: 900px) {
   .editor-layout {
     flex-direction: column;

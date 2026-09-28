@@ -1,15 +1,4 @@
-/* ==================== 图片档案库 ==================== */
-/**
- * archive.js — PrismDen 图片档案库模块
- * 功能：本地归档处理结果与导入图片，支持检索、筛选、排序、收藏、标签、导出
- * 存储：IndexedDB（数据库名 prismden_archive，对象仓 images）
- *       记录结构：{ id, name, source, tags[], favorite, createdAt,
- *                  width, height, size, type, thumb(缩略图 dataURL), blob(原图) }
- * 依赖：main.js 的 showToast / vibrate；i18n.js 的 i18n.t
- * 对外接口：window.PrismDenArchive（save/remove/clear/count）
- *           window.onArchivePageEnter（main.js switchPage 回调）
- *           window.archiveCurrentResult（页面入口按钮）
- */
+
 
 (function () {
   'use strict';
@@ -17,20 +6,17 @@
   var DB_NAME = 'prismden_archive';
   var DB_VERSION = 1;
   var STORE = 'images';
-  var THUMB_MAX = 480;          // 缩略图最长边
+  var THUMB_MAX = 480;
   var _db = null;
-  var _cache = [];              // 全量记录缓存（含 blob 引用）
+  var _cache = [];
   var _filter = { source: 'all', keyword: '', favOnly: false, sort: 'time' };
   var _previewId = null;
   var _dragDepth = 0;
 
-  /* ── DOM 引用 ── */
   var elGrid, elEmpty, elSearch, elFavToggle, elSort, elStorage;
   var elModalBackdrop, elModalImg, elModalName, elModalSource, elModalDims;
   var elModalBytes, elModalDate, elModalTags, elModalFav;
   var elFileInput, elDropHint;
-
-  /* ══════════════ IndexedDB ══════════════ */
 
   function openDB() {
     return new Promise(function (resolve, reject) {
@@ -86,8 +72,6 @@
     });
   }
 
-  /* ══════════════ 工具函数 ══════════════ */
-
   function uid() {
     return 'img_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
   }
@@ -106,8 +90,8 @@
   }
 
   function sourceLabel(source) {
-    var map = { denoise: 'archSrcDenoise', filter: 'archSrcFilter', import: 'archSrcImport' };
-    return i18n ? i18n.t(map[source] || 'archSrcImport') : source;
+    var map = { denoise: '降噪', filter: '滤镜', import: '导入' };
+    return map[source] || '导入';
   }
 
   function makeThumb(img) {
@@ -117,7 +101,7 @@
     var c = document.createElement('canvas');
     c.width = w; c.height = h;
     var ctx = c.getContext('2d');
-    /* JPEG 不支持透明，先铺白底避免透明区域变黑 */
+
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, 0, 0, w, h);
@@ -133,8 +117,6 @@
       img.src = url;
     });
   }
-
-  /* ══════════════ 归档 ══════════════ */
 
   async function saveBlob(blob, meta) {
     meta = meta || {};
@@ -161,9 +143,6 @@
     return record.id;
   }
 
-  /* 入口一：降噪结果页「存入档案库」
-   * resultBlob / resultFileName 是 main.js 顶层 let 声明，
-   * 经全局词法环境对其他经典脚本可见 */
   window.archiveCurrentResult = function () {
     try {
       if (typeof resultBlob !== 'undefined' && resultBlob) {
@@ -177,19 +156,15 @@
           tags: ['denoise'],
           params: params
         }).then(function (id) {
-          if (id && typeof showToast === 'function') showToast(i18n.t('archSaved'), 'success');
+          if (id && typeof showToast === 'function') showToast('已存入档案库', 'success');
           if (typeof vibrate === 'function') vibrate(10);
         });
       } else {
-        if (typeof showToast === 'function') showToast(i18n.t('archSaveEmpty'), 'error');
+        if (typeof showToast === 'function') showToast('当前没有可存入的结果', 'error');
       }
-    } catch (e) { /* 结果对象缺失时静默降级 */ }
+    } catch (e) {  }
   };
 
-  /* 入口二（已下线）：滤镜页「存入档案库」
-     创意滤镜模块归档后此入口停用，恢复方式见 _parked/page-filter.html */
-
-  /* 入口三：本页手动导入（支持多选） */
   function importFiles(fileList) {
     var files = Array.prototype.slice.call(fileList || []).filter(function (f) {
       return /^image\//.test(f.type);
@@ -204,13 +179,11 @@
     });
     chain.then(function () {
       if (typeof showToast === 'function') {
-        showToast(i18n.t('archSavedCount') + ' ' + files.length + ' ' + i18n.t('archItems'), 'success');
+        showToast('成功存入' + ' ' + files.length + ' ' + '张图片', 'success');
       }
       if (typeof vibrate === 'function') vibrate(12);
     });
   }
-
-  /* ══════════════ 渲染 ══════════════ */
 
   function applyFilterList() {
     var kw = _filter.keyword.trim().toLowerCase();
@@ -280,7 +253,7 @@
   function updateStorage() {
     if (!elStorage) return;
     var total = _cache.reduce(function (s, r) { return s + (r.size || 0); }, 0);
-    elStorage.textContent = _cache.length + ' ' + i18n.t('archItems') + ' · ' + _fmtBytes(total);
+    elStorage.textContent = _cache.length + ' ' + '张图片' + ' · ' + _fmtBytes(total);
   }
 
   async function refresh() {
@@ -288,8 +261,6 @@
     _cache = await dbAll();
     render();
   }
-
-  /* ══════════════ 预览弹窗 ══════════════ */
 
   function findRecord(id) {
     for (var i = 0; i < _cache.length; i++) {
@@ -326,7 +297,7 @@
   }
 
   function syncFavBtn(fav) {
-    elModalFav.textContent = fav ? i18n.t('archFavBtnOn') : i18n.t('archFavBtn');
+    elModalFav.textContent = fav ? '取消收藏' : '收藏';
     elModalFav.classList.toggle('active', !!fav);
   }
 
@@ -338,10 +309,8 @@
     render();
   }
 
-  /* ══════════════ 事件绑定 ══════════════ */
-
   function bindEvents() {
-    /* 导入 */
+
     document.getElementById('archiveImportBtn').addEventListener('click', function () {
       elFileInput.click();
     });
@@ -350,7 +319,6 @@
       e.target.value = '';
     });
 
-    /* 整页拖拽导入 */
     var section = document.getElementById('page-archive');
     section.addEventListener('dragenter', function (e) {
       if (e.target.closest('.archive-modal')) return;
@@ -370,18 +338,16 @@
       if (e.dataTransfer && e.dataTransfer.files.length) importFiles(e.dataTransfer.files);
     });
 
-    /* 清空 */
     document.getElementById('archiveClearBtn').addEventListener('click', async function () {
       if (!_cache.length) return;
-      if (!confirm(i18n.t('archConfirmClear'))) return;
+      if (!confirm('确定要清空档案库中的所有图片吗？')) return;
       await dbClear();
       _cache = [];
       render();
-      if (typeof showToast === 'function') showToast(i18n.t('archCleared'), 'success');
+      if (typeof showToast === 'function') showToast('档案库已清空', 'success');
       if (typeof vibrate === 'function') vibrate(10);
     });
 
-    /* 工具栏 */
     var searchTimer = null;
     elSearch.addEventListener('input', function () {
       clearTimeout(searchTimer);
@@ -420,20 +386,19 @@
       pill.style.width = rect.width + 'px';
       pill.style.transform = 'translateX(' + (rect.left - parentRect.left - 3) + 'px)';
     }
-    /* 初始与窗口变化时校准 pill */
+
     var initPill = function () {
       var active = tabs.querySelector('.archive-tab.active');
       if (active) movePill(active);
     };
     requestAnimationFrame(initPill);
     window.addEventListener('resize', initPill);
-    /* 语言切换后文案宽度变化，重新校准 pill（监听 <html lang> 属性） */
+
     if (typeof MutationObserver !== 'undefined') {
       new MutationObserver(function () { requestAnimationFrame(initPill); })
         .observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
     }
 
-    /* 弹窗 */
     document.getElementById('archiveModalClose').addEventListener('click', closePreview);
     elModalBackdrop.addEventListener('click', function (e) {
       if (e.target === elModalBackdrop) closePreview();
@@ -463,20 +428,18 @@
     elModalTags.addEventListener('change', function () {
       var tags = elModalTags.value.split(/[,，]/).map(function (s) { return s.trim(); }).filter(Boolean);
       updatePreviewRecord({ tags: tags });
-      if (typeof showToast === 'function') showToast(i18n.t('archTagsSaved'), 'success');
+      if (typeof showToast === 'function') showToast('标签已保存', 'success');
     });
 
     document.getElementById('archiveModalDelete').addEventListener('click', async function () {
-      if (!confirm(i18n.t('archConfirmDelete'))) return;
+      if (!confirm('确定要删除这张图片吗？')) return;
       await dbDelete(_previewId);
       closePreview();
       await refresh();
-      if (typeof showToast === 'function') showToast(i18n.t('archDeleted'), 'success');
+      if (typeof showToast === 'function') showToast('已删除', 'success');
       if (typeof vibrate === 'function') vibrate(8);
     });
   }
-
-  /* ══════════════ 初始化 ══════════════ */
 
   function init() {
     elGrid = document.getElementById('archiveGrid');
@@ -499,9 +462,6 @@
 
     if (!elGrid || !elModalBackdrop) return;
 
-    // 预览弹窗移到 body 下：.page-section 是 position:absolute + z-index:0，
-    // 会创建独立层叠上下文，把弹窗的 z-index:2000 困在里面，
-    // 导致固定导航栏（根上下文 z-index:1000）在手机端盖住弹窗卡片顶部
     if (elModalBackdrop.parentElement !== document.body) {
       document.body.appendChild(elModalBackdrop);
     }
@@ -510,14 +470,12 @@
     refresh();
   }
 
-  /* 对外 API（供其他模块/后续功能调用） */
   window.PrismDenArchive = {
     save: saveBlob,
     count: function () { return _cache.length; },
     refresh: refresh
   };
 
-  /* main.js switchPage 的进入回调 */
   window.onArchivePageEnter = function () {
     refresh();
   };

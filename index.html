@@ -14,10 +14,7 @@
   <meta name="color-scheme" content="light dark" />
   <title>PrismDen</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- filter.css 已随创意滤镜模块归档到 _parked/，暂不加载 -->
-  <link rel="stylesheet" href="ticket.css" />
-  <link rel="stylesheet" href="profile.css" />
-  <!-- palette.css 已随色卡模块归档到 _parked/，暂不加载 -->
+
   <link rel="stylesheet" href="modules.css" />
   <link rel="stylesheet" href="archive.css" />
   <link rel="icon" href="./002.jpg" type="image/x-icon">
@@ -38,111 +35,81 @@
 </head>
 <body>
 
-<!-- 欢迎 -->
 <div class="welcome-overlay" id="welcomeOverlay" onclick="var o=this;if(o._d)return;o._d=1;o.style.pointerEvents='none';o.classList.add('fade-out');var h=document.getElementById('page-home');if(h){var e=h.querySelectorAll('.hero-kanji,.word,.hero-subtitle,.hero-actions');for(var i=0;i<e.length;i++){e[i].style.animation='none';e[i].offsetHeight;e[i].style.animation=''}}setTimeout(function(){o.remove();var n=document.querySelector('.nav-link[data-page=home]');if(n)n.classList.add('active')},600)">
   <div class="welcome-bg-circle welcome-bg-circle-1"></div>
   <div class="welcome-bg-circle welcome-bg-circle-2"></div>
   <div class="welcome-bg-circle welcome-bg-circle-3"></div>
   <div class="welcome-content">
     <div class="welcome-logo">PrismDen</div>
-    <div class="welcome-subtitle" data-i18n="welcomeSubtitle" data-i18n-html="true">棱镜降噪 · 图像降噪处理平台</div>
+    <div class="welcome-subtitle">棱镜降噪 · 图像降噪处理平台</div>
   </div>
-    <div class="welcome-hint" id="welcomeHint" data-i18n="welcomeHint">点击任意位置进入</div>
+    <div class="welcome-hint" id="welcomeHint">点击任意位置进入</div>
   </div>
 </div>
 
-<!-- 背景动画 -->
 <div class="bg-animation">
   <div class="bg-circle bg-circle-1"></div>
   <div class="bg-circle bg-circle-2"></div>
   <div class="bg-circle bg-circle-3"></div>
 </div>
 
-<!-- 导航栏 -->
 <nav class="navbar" id="navbar">
   <div class="nav-brand" id="navBrand">
     <div class="nav-brand-row">
       <img src="002.jpg" class="nav-icon" onclick="switchPage('home')" style="cursor:pointer;width:22px;height:22px;" alt="logo">
-      <span class="nav-title"><a href="#" onclick="switchPage('home'); return false;"><em data-i18n="brandTag">PrismDen -- Young__Yang</em></a></span>
+      <span class="nav-title"><a href="#" onclick="switchPage('home'); return false;"><em>PrismDen -- Young__Yang</em></a></span>
     </div>
   </div>
   <div class="nav-links" id="navLinks">
-    <span class="nav-link active" data-page="home" data-i18n="navHome">首页</span>
-    <span class="nav-link" data-page="upload" data-i18n="navUpload">图像降噪</span>
-    <span class="nav-link" data-page="result" data-i18n="navResult">降噪结果</span>
-    <span class="nav-link" data-page="ticket" data-i18n="navTicket">旅行票根</span>
-    <span class="nav-link" data-page="batch" data-i18n="navBatch">批量处理</span>
-    <span class="nav-link" data-page="editor" data-i18n="navEditor">图像编辑</span>
-    <span class="nav-link" data-page="history" data-i18n="navHistory">处理日志</span>
-    <span class="nav-link" data-page="archive" data-i18n="navArchive">档案库</span>
-    <span class="nav-link" data-page="profile" data-i18n="navProfile">设置中心</span>
+    <span class="nav-link active" data-page="home">首页</span>
+    <span class="nav-link" data-page="upload">图像降噪</span>
+    <span class="nav-link" data-page="result">降噪结果</span>
+    <span class="nav-link" data-page="batch">批量处理</span>
+    <span class="nav-link" data-page="editor">图像编辑</span>
+    <span class="nav-link" data-page="history">处理日志</span>
+    <span class="nav-link" data-page="archive">档案库</span>
   </div>
-  <!-- <div class="nav-right">
-    <div class="nav-status" id="statusBar">
-      <div class="status-dot" id="statusDot"></div>
-      <span id="statusText" data-i18n="statusConnecting">等待后端连接...</span>
-    </div>
-    <button class="nav-ping-btn" onclick="pingBackend()">检测服务</button>
-    <button class="volume-btn" id="volumeBtn" onclick="toggleSound()" title="音效开关">
-      <svg class="volume-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-      </svg>
-      <svg class="volume-off" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-        <line x1="23" y1="9" x2="17" y2="15"></line>
-        <line x1="17" y1="9" x2="23" y2="15"></line>
-      </svg>
-    </button>
-  </div> -->
+
 </nav>
 
-<!-- 1: 首页 -->
 <section class="page-section active" id="page-home" data-page="home">
 
   <section class="hero">
     <div class="hero-sketch-bg">
-      <!-- <img src="./hero-sketch.png" alt="" class="hero-sketch hero-desktop" /> -->
-      <!-- <img src="./hero-boy.png" alt="" class="hero-sketch hero-mobile" /> -->
+
     </div>
     <div class="hero-inner">
       <div class="hero-content">
-        <p class="hero-kanji" data-i18n="heroKanji">Image Processing · Young__Yang</p>
+        <p class="hero-kanji">Image Processing · Young__Yang</p>
         <h1 class="hero-title">
-          <!-- <span class="word-wrap"><span class="word">PrismDen</span></span> -->
+
           <span class="word-wrap"><span class="word"><em>PrismDen</em></span></span>
         </h1>
-        <p class="hero-subtitle"><span data-i18n="heroSubtitle" data-i18n-html="true">Hash-Accelerated Bilateral Filtering<br>哈希加速双边滤波图像降噪项目</span></p>
+        <p class="hero-subtitle"><span>Hash-Accelerated Bilateral Filtering<br>哈希加速双边滤波图像降噪项目</span></p>
         <div class="hero-actions">
-          <button class="btn btn-hero-action" onclick="switchPage('upload')" data-i18n="btnDenoise">即刻降噪</button>
+          <button class="btn btn-hero-action" onclick="switchPage('upload')">即刻降噪</button>
           <div class="theme-switcher" id="themeSwitcher">
-            <span class="theme-option active" data-theme-option="light" onclick="setTheme('light')" data-i18n="themeLight">浅色</span>
-            <span class="theme-option" data-theme-option="dark" onclick="setTheme('dark')" data-i18n="themeDark">深色</span>
+            <span class="theme-option active" data-theme-option="light" onclick="setTheme('light')">浅色</span>
+            <span class="theme-option" data-theme-option="dark" onclick="setTheme('dark')">深色</span>
             <div class="theme-pill"></div>
           </div>
         </div>
       </div>
     </div>
     <div class="scroll-hint" onclick="switchPage('upload')" style="cursor:pointer;">
-      <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="9 6 15 12 9 18"></polyline>
-      </svg> -->
-      <!-- <span style="font-size:0.82rem; color:var(--stone); letter-spacing:0.08em;">向下滚动查看详情</span> -->
+
     </div>
   </section>
 </section>
 
-<!-- 3: 上传处理 -->
 <section class="page-section" id="page-upload" data-page="upload">
 
   <main class="page-main page-main-wide">
     <div class="upload-params-grid">
 
-      <!-- 左列：上传区域 -->
       <section class="content-section upload-col">
         <div class="panel-header">
-          <h2 data-i18n="uploadTitle">导入图片</h2>
+          <h2>导入图片</h2>
         </div>
 
         <div class="upload-zone glass-card bounce-card" id="uploadZone" style="animation-delay:0s;">
@@ -154,8 +121,8 @@
                 <path d="M10 36H38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
             </div>
-            <p class="upload-hint" data-i18n="uploadHint">点击导入图片</p>
-            <p class="upload-format" data-i18n="uploadFormat">支持 PNG · JPG · JPEG · RAW · BMP · TIFF · WebP</p>
+            <p class="upload-hint">点击导入图片</p>
+            <p class="upload-format">支持 PNG · JPG · JPEG · RAW · BMP · TIFF · WebP</p>
           </div>
         </div>
 
@@ -168,95 +135,80 @@
                 <path d="M13 2H3L2 5V14H14V5L13 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
                 <path d="M8 12V6M8 6L5 9M8 6L11 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span data-i18n="btnChangePhoto">更换照片</span>
+              <span>更换照片</span>
             </button>
             <button class="img-action-btn remove" onclick="removeImage()">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path d="M5 2L2 5V14H14V5L11 2H5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
                 <path d="M6 7L10 11M10 7L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span data-i18n="btnRemovePhoto">移除照片</span>
+              <span>移除照片</span>
             </button>
           </div>
           <div class="img-meta hidden" id="imgMeta">
-            <div class="meta-row"><span class="meta-key"><span data-i18n="metaName">文件名</span></span><span class="meta-val" id="metaName">--</span></div>
-            <div class="meta-row"><span class="meta-key"><span data-i18n="metaFormat">格式</span></span><span class="meta-val" id="metaFormat">--</span></div>
-            <div class="meta-row"><span class="meta-key"><span data-i18n="metaSize">大小</span></span><span class="meta-val" id="metaBytes">--</span></div>
+            <div class="meta-row"><span class="meta-key"><span>文件名</span></span><span class="meta-val" id="metaName">--</span></div>
+            <div class="meta-row"><span class="meta-key"><span>格式</span></span><span class="meta-val" id="metaFormat">--</span></div>
+            <div class="meta-row"><span class="meta-key"><span>大小</span></span><span class="meta-val" id="metaBytes">--</span></div>
             <div class="meta-divider"></div>
-            <div class="meta-sub" data-i18n="metaCamera">相机参数</div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span data-i18n="metaMake">相机制造商</span></span><span class="meta-val" id="metaMake">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span data-i18n="metaModel">相机型号</span></span><span class="meta-val" id="metaModel">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span data-i18n="metaAperture">光圈</span></span><span class="meta-val" id="metaAperture">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span data-i18n="metaShutter">快门</span></span><span class="meta-val" id="metaShutter">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span data-i18n="metaISO">ISO</span></span><span class="meta-val" id="metaISO">--</span></div>
-            <div class="meta-row meta-exif-row"><span class="meta-key"><span data-i18n="metaFocal">焦距</span></span><span class="meta-val" id="metaFocal">--</span></div>
+            <div class="meta-sub">相机参数</div>
+            <div class="meta-row meta-exif-row"><span class="meta-key"><span>相机制造商</span></span><span class="meta-val" id="metaMake">--</span></div>
+            <div class="meta-row meta-exif-row"><span class="meta-key"><span>相机型号</span></span><span class="meta-val" id="metaModel">--</span></div>
+            <div class="meta-row meta-exif-row"><span class="meta-key"><span>光圈</span></span><span class="meta-val" id="metaAperture">--</span></div>
+            <div class="meta-row meta-exif-row"><span class="meta-key"><span>快门</span></span><span class="meta-val" id="metaShutter">--</span></div>
+            <div class="meta-row meta-exif-row"><span class="meta-key"><span>ISO</span></span><span class="meta-val" id="metaISO">--</span></div>
+            <div class="meta-row meta-exif-row"><span class="meta-key"><span>焦距</span></span><span class="meta-val" id="metaFocal">--</span></div>
           </div>
         </div>
 
       </section>
 
-      <!-- 右列：降噪参数 -->
       <section class="content-section params-col">
         <div class="panel-header" style="flex-wrap:wrap;">
-          <h2 data-i18n="paramTitle">降噪参数</h2>
+          <h2>降噪参数</h2>
         </div>
-
-        <!-- <div class="params-grid">
-          <div class="param-card glass-card bounce-card" style="animation-delay:0.4s;">
-            <h3 class="param-card-title"><span data-i18n="featBilateral">双边滤波算法</span></h3>
-            <div class="algo-formula">
-              W(i,j) = Gₛ(|i−j|) · Gᵣ(|I(i)−I(j)|)<br/>
-              Gₛ = exp(−||xy||² / 2σₛ²)<br/>
-              Gᵣ = exp(−||I||² / 2σᵣ²)
-            </div>
-          </div>
-          <div class="param-card glass-card bounce-card" style="animation-delay:0.8s;">
-            <h3 class="param-card-title" style="font-size:1.15rem; line-height:1.8;">云赴山巅<br>自在远行<br>春和景明<br>白日梦想家</h3>
-          </div>
-        </div> -->
 
         <div class="param-controls glass-card bounce-card" style="animation-delay:1.2s;">
           <div class="param-group">
             <label class="param-label">
-              <span data-i18n="sigmaSLabel">空间半径</span>
+              <span>空间半径</span>
               <span>σₛ = <em id="sigmaS_val">5</em></span>
             </label>
             <input type="range" class="slider" id="sigmaS" min="1" max="15" value="5"
               oninput="document.getElementById('sigmaS_val').textContent=this.value" />
-            <div class="param-scale"><span data-i18n="sigmaSScaleL">1 &mdash; 轻微</span><span data-i18n="sigmaSScaleR">15 &mdash; 强力</span></div>
+            <div class="param-scale"><span>1 &mdash; 轻微</span><span>15 &mdash; 强力</span></div>
           </div>
 
           <div class="param-group">
             <label class="param-label">
-              <span data-i18n="sigmaRLabel">颜色阈值</span>
+              <span>颜色阈值</span>
               <span>σᵣ = <em id="sigmaR_val">25</em></span>
             </label>
             <input type="range" class="slider" id="sigmaR" min="1" max="100" value="25"
               oninput="document.getElementById('sigmaR_val').textContent=this.value" />
-            <div class="param-scale"><span data-i18n="sigmaRScaleL">1 &mdash; 保边</span><span data-i18n="sigmaRScaleR">100 &mdash; 平滑</span></div>
+            <div class="param-scale"><span>1 &mdash; 保边</span><span>100 &mdash; 平滑</span></div>
           </div>
 
           <div class="param-group">
-            <label class="param-label"><span data-i18n="resultMode">降噪模式</span></label>
+            <label class="param-label"><span>降噪模式</span></label>
             <div class="mode-tabs" id="modeTabs">
-              <button class="mode-tab active" data-mode="bilateral" onclick="selectMode(this)"><span data-i18n="modeBilateral">彩色双边</span></button>
-              <button class="mode-tab" data-mode="grayscale" onclick="selectMode(this)"><span data-i18n="modeGrayscale">灰度 Y 通道</span></button>
+              <button class="mode-tab active" data-mode="bilateral" onclick="selectMode(this)"><span>彩色双边</span></button>
+              <button class="mode-tab" data-mode="grayscale" onclick="selectMode(this)"><span>灰度 Y 通道</span></button>
               <div class="mode-pill" id="modePill"></div>
             </div>
           </div>
 
           <button class="btn btn-primary btn-process" id="processBtn" onclick="processImage()" disabled>
-            <span class="btn-text" data-i18n="btnStartDenoise">开始图像降噪</span>
+            <span class="btn-text">开始图像降噪</span>
             <div class="btn-spinner hidden" id="btnSpinner"></div>
           </button>
 
           <div class="progress-wrap hidden" id="progressWrap">
             <div class="progress-bar" id="progressBar" style="width:0%"></div>
-            <span class="progress-text" id="progressText" data-i18n="processing">处理中...</span>
+            <span class="progress-text" id="progressText">处理中...</span>
           </div>
 
           <div class="timing hidden" id="timingBlock">
-            <span class="timing-label"><span data-i18n="resultTiming">处理耗时</span></span>
+            <span class="timing-label"><span>处理耗时</span></span>
             <span class="timing-val" id="timingVal">-- ms</span>
           </div>
         </div>
@@ -267,141 +219,126 @@
 
 </section>
 
-<!-- 4: 处理结果 -->
 <section class="page-section" id="page-result" data-page="result">
 
   <main class="page-main" id="mainContent">
 
-    <!-- 无结果提示 -->
     <div class="empty-state glass-card" id="emptyState">
-      <h3 data-i18n="emptyTitle">暂无处理结果</h3>
-      <p data-i18n="emptyDesc">请先前往上传处理页面导入图片并进行降噪处理</p>
-      <button class="goto-upload-btn" onclick="switchPage('upload')"><span data-i18n="btnGoUpload">去上传图片</span></button>
+      <h3>暂无处理结果</h3>
+      <p>请先前往上传处理页面导入图片并进行降噪处理</p>
+      <button class="goto-upload-btn" onclick="switchPage('upload')"><span>去上传图片</span></button>
     </div>
 
-    <!-- 结果展示区 -->
     <div id="resultContent" class="hidden">
 
-      <!-- 耗时 + 参数信息 -->
       <div class="result-info-bar glass-card bounce-card" id="resultInfoBar" style="animation-delay:0s;">
         <div class="info-item">
-          <span class="info-label"><span data-i18n="resultTiming">处理耗时</span></span>
+          <span class="info-label"><span>处理耗时</span></span>
           <span class="info-val" id="resultTiming">--</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
-            <span class="info-label">σₛ <span data-i18n="sigmaSLabel">空间半径</span></span>
+            <span class="info-label">σₛ <span>空间半径</span></span>
             <span class="info-val" id="resultSigmaS">--</span>
           </div>
           <div class="info-divider"></div>
           <div class="info-item">
-            <span class="info-label">σᵣ <span data-i18n="sigmaRLabel">颜色阈值</span></span>
+            <span class="info-label">σᵣ <span>颜色阈值</span></span>
           <span class="info-val" id="resultSigmaR">--</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
-          <span class="info-label"><span data-i18n="resultMode">降噪模式</span></span>
+          <span class="info-label"><span>降噪模式</span></span>
           <span class="info-val" id="resultMode">--</span>
         </div>
       </div>
 
-      <!-- 左右布局：左=降噪结果+保存，右=照片信息 -->
       <div class="result-grid">
 
-        <!-- 左栏：降噪结果 + 保存图片（上下分布） -->
         <div class="result-left-col">
-          <!-- 降噪结果 -->
+
           <section class="content-section">
             <div class="panel-header">
-              <h2 data-i18n="resultTitle">降噪结果</h2>
+              <h2>降噪结果</h2>
             </div>
             <div class="result-canvas-wrap glass-card bounce-card" style="animation-delay:0.5s;">
               <canvas id="resultCanvas" class="img-canvas-full"></canvas>
             </div>
-            <!-- <div class="compare-hint" id="compareHint" onclick="openCompare()">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M6 2L2 8L6 14M10 2L14 8L10 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-              点击对比查看<span data-i18n="compareOriginal">原图</span> / 处理后效果
-            </div> -->
+
           </section>
 
-          <!-- 保存图片（在降噪结果下方） -->
           <section class="content-section" style="margin-top:2rem;">
-            <!-- <div class="panel-header">
-              <h2><span data-i18n="btnSave"><span data-i18n="btnSaveFilter">保存图片</span></span></h2>
-            </div> -->
+
             <div class="save-block glass-card bounce-card" id="saveBlock" style="animation-delay:1.0s;">
               <div class="save-format-row">
-                <span class="save-label" data-i18n="saveFormat">保存格式</span>
+                <span class="save-label">保存格式</span>
                 <div class="save-format-tabs" id="saveFormatTabs">
-                  <button class="save-fmt-btn active" data-fmt="png" onmouseenter="selectSaveFormat(this)"><span data-i18n="savePNG">PNG</span></button>
-                  <button class="save-fmt-btn" data-fmt="jpeg" onmouseenter="selectSaveFormat(this)"><span data-i18n="saveJPEG">JPEG</span></button>
-                  <button class="save-fmt-btn" data-fmt="webp" onmouseenter="selectSaveFormat(this)"><span data-i18n="saveWebP">WebP</span></button>
+                  <button class="save-fmt-btn active" data-fmt="png" onmouseenter="selectSaveFormat(this)"><span>PNG</span></button>
+                  <button class="save-fmt-btn" data-fmt="jpeg" onmouseenter="selectSaveFormat(this)"><span>JPEG</span></button>
+                  <button class="save-fmt-btn" data-fmt="webp" onmouseenter="selectSaveFormat(this)"><span>WebP</span></button>
                   <div class="save-format-pill"></div>
                 </div>
               </div>
               <div id="qualityRow" style="display:none; flex-direction:column; gap:8px;">
-                <label class="param-label"><span data-i18n="qualityLabel">压缩质量</span> <em id="qualityVal">92</em>%</label>
+                <label class="param-label"><span>压缩质量</span> <em id="qualityVal">92</em>%</label>
                 <input type="range" class="slider" id="qualitySlider" min="60" max="100" value="92"
                   oninput="document.getElementById('qualityVal').textContent=this.value" />
               </div>
               <div class="save-actions" id="saveActions">
-                <button class="save-action-btn" data-action="save" onmouseenter="selectSaveAction(this)"><span data-i18n="btnSave">保存图片</span></button>
-                <button class="save-action-btn" data-action="new" onmouseenter="selectSaveAction(this)"><span data-i18n="btnNewImage">处理新图片</span></button>
+                <button class="save-action-btn" data-action="save" onmouseenter="selectSaveAction(this)"><span>保存图片</span></button>
+                <button class="save-action-btn" data-action="new" onmouseenter="selectSaveAction(this)"><span>处理新图片</span></button>
                 <div class="save-action-pill"></div>
               </div>
-              <button class="save-confirm-btn" id="saveConfirmBtn" onclick="executeSaveAction()"><span data-i18n="btnConfirm">确定</span></button>
-              <button class="btn btn-ghost archive-save-btn" id="archiveResultBtn" onclick="archiveCurrentResult()"><span data-i18n="archSaveToArchive">存入档案库</span></button>
+              <button class="save-confirm-btn" id="saveConfirmBtn" onclick="executeSaveAction()"><span>确定</span></button>
+              <button class="btn btn-ghost archive-save-btn" id="archiveResultBtn" onclick="archiveCurrentResult()"><span>存入档案库</span></button>
             </div>
           </section>
         </div>
 
-        <!-- 右栏：照片信息（精简） -->
         <section class="content-section result-right-col">
           <div class="panel-header">
-            <h2><span data-i18n="photoInfo">照片信息</span></h2>
+            <h2><span>照片信息</span></h2>
           </div>
           <div class="photo-info glass-card bounce-card" id="photoInfoBlock" style="animation-delay:0.8s;">
-            <!-- 相机参数 -->
-            <div class="info-sub-header" data-i18n="metaCamera">相机参数</div>
+
+            <div class="info-sub-header">相机参数</div>
             <div class="info-row">
-              <span class="info-key"><span data-i18n="metaMake">相机制造商</span></span>
+              <span class="info-key"><span>相机制造商</span></span>
               <span class="info-val" id="infoMake">--</span>
             </div>
             <div class="info-row">
-              <span class="info-key"><span data-i18n="metaModel">相机型号</span></span>
+              <span class="info-key"><span>相机型号</span></span>
               <span class="info-val" id="infoModel">--</span>
             </div>
             <div class="info-row">
-              <span class="info-key"><span data-i18n="metaAperture">光圈</span></span>
+              <span class="info-key"><span>光圈</span></span>
               <span class="info-val" id="infoAperture">--</span>
             </div>
             <div class="info-row">
-              <span class="info-key"><span data-i18n="metaShutter">快门</span></span>
+              <span class="info-key"><span>快门</span></span>
               <span class="info-val" id="infoShutter">--</span>
             </div>
             <div class="info-row">
-              <span class="info-key"><span data-i18n="metaISO">ISO</span></span>
+              <span class="info-key"><span>ISO</span></span>
               <span class="info-val" id="infoISO">--</span>
             </div>
             <div class="info-row">
-              <span class="info-key"><span data-i18n="metaFocal">焦距</span></span>
+              <span class="info-key"><span>焦距</span></span>
               <span class="info-val" id="infoFocal">--</span>
             </div>
             <div class="info-divider-row"></div>
-            <!-- 文件信息 -->
-            <div class="info-sub-header"><span data-i18n="fileInfo">文件信息</span></div>
+
+            <div class="info-sub-header"><span>文件信息</span></div>
             <div class="info-row">
-              <span class="info-key" data-i18n="fileSize">文件大小</span>
+              <span class="info-key">文件大小</span>
               <span class="info-val" id="infoFileSize">--</span>
             </div>
             <div class="info-row">
-              <span class="info-key" data-i18n="fileFormat">文件格式</span>
+              <span class="info-key">文件格式</span>
               <span class="info-val" id="infoFormat">--</span>
             </div>
             <div class="info-row">
-              <span class="info-key"><span data-i18n="colorSpace">颜色空间</span></span>
+              <span class="info-key"><span>颜色空间</span></span>
               <span class="info-val" id="infoColorSpace">--</span>
             </div>
           </div>
@@ -413,136 +350,16 @@
 
   </main>
 
-</section><!-- end #page-result -->
+</section>
 
-<!-- 5: 旅行票根 -->
-<section class="page-section" id="page-ticket" data-page="ticket">
-
-  <div class="ticket-page">
-    <!-- 左侧：上传 & 设置 -->
-    <div class="ticket-panel" id="ticketPanel">
-      <div class="sheet-top-bar">
-        <div class="sheet-drag-handle"></div>
-        <button class="sheet-expand-btn" id="ticketExpandBtn" aria-label="展开/收起弹窗">
-          <svg class="arrow-up" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="18 15 12 9 6 15"/>
-          </svg>
-          <svg class="arrow-down" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
-      </div>
-      <div class="ticket-panel-title" data-i18n="ticketTitle">旅行票根</div>
-      <p class="ticket-panel-desc" data-i18n="ticketDesc">上传照片，生成专属电子旅行票根</p>
-
-      <div class="ticket-upload-zone" id="ticketUploadZone">
-        <div class="ticket-upload-content" id="ticketUploadContent">
-          <div class="ticket-upload-icon">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="6" y="10" width="36" height="28" rx="4"/>
-              <circle cx="17" cy="22" r="3"/>
-              <path d="M6 32l10-12 8 10 6-6 12 14"/>
-            </svg>
-          </div>
-          <p class="ticket-upload-text" data-i18n="ticketUploadHint">拖放或点击上传照片</p>
-          <p class="ticket-upload-hint" data-i18n="ticketUploadFormat">支持 JPG / PNG / WebP</p>
-        </div>
-        <div class="ticket-upload-preview" id="ticketUploadPreview" style="display:none;">
-          <img id="ticketUploadPreviewImg" src="" alt="预览" />
-          <p class="ticket-upload-text" style="margin-top:8px;font-size:0.82rem;color:var(--ink-faded);" data-i18n="ticketChangeHint">点击更换照片</p>
-        </div>
-        <input type="file" id="ticketFileInput" accept="image/*" hidden>
-      </div>
-
-      <!-- 移动端：弹窗内票根预览（上传后显示生成的票根缩略版） -->
-      <div class="ticket-sheet-preview" id="ticketSheetPreview" style="display:none;">
-        <p class="ticket-sheet-preview-label" data-i18n="ticketPreview">票根预览</p>
-        <div class="ticket-sheet-preview-inner" id="ticketSheetPreviewInner"></div>
-      </div>
-
-      <div class="ticket-editor" id="ticketEditorBlock" style="display:none;">
-        <p class="editor-title" data-i18n="ticketEditor">编辑票根信息</p>
-        <div class="form-group">
-          <label class="form-label"><span data-i18n="ticketDest">目的地</span></label>
-          <input type="text" id="ticketDestination" class="form-input" placeholder="如：CHUAN XI" value="CHUAN XI" autocomplete="off" autocorrect="off" autocapitalize="characters" inputmode="text">
-          <span class="form-hint"><span data-i18n="ticketDestHint">纯英文大写建议15字符以内</span></span>
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-i18n="ticketLocation">中文地名</label>
-          <input type="text" id="ticketLocationCN" class="form-input" placeholder="如：中国 · 川西" value="中国 · 川西" autocomplete="off" autocorrect="off" inputmode="text">
-        </div>
-        <div class="form-group">
-          <label class="form-label"><span data-i18n="ticketDate">日期</span></label>
-          <input type="text" id="ticketDate" class="form-input" placeholder="如：2026 · 7" value="2026 · 7" autocomplete="off" autocorrect="off" inputmode="text">
-        </div>
-        <div class="form-group">
-          <label class="form-label"><span data-i18n="ticketName">旅行者</span></label>
-          <input type="text" id="ticketName" class="form-input" placeholder="如：Young__Yang" value="Young__Yang" autocomplete="off" autocorrect="off" inputmode="text">
-        </div>
-        <div class="form-group">
-          <label class="form-label"><span data-i18n="ticketNo">票号</span></label>
-          <input type="text" id="ticketTicketNo" class="form-input" placeholder="如：NO.028561" value="NO.028561" autocomplete="off" autocorrect="off" inputmode="text">
-        </div>
-        <div class="form-group">
-          <label class="form-label"><span data-i18n="ticketCode">防伪码</span></label>
-          <input type="text" id="ticketCode" class="form-input" placeholder="自动生成" readonly autocomplete="off" autocorrect="off" inputmode="text">
-          <button class="btn-regenerate" onclick="regenerateTicketCode()"><span data-i18n="btnRegenerate">重新生成</span></button>
-        </div>
-        <div class="editor-actions">
-          <button class="btn btn-primary" onclick="downloadTicket()" data-i18n="btnDownload">下载票根</button>
-          <button class="btn btn-secondary" onclick="resetTicketAll()" data-i18n="btnReupload">重新上传</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 右侧：票根预览 -->
-    <div class="ticket-preview-area" id="ticketPreviewArea">
-      <div class="preview-placeholder" id="ticketPreviewPlaceholder">
-        <div class="placeholder-content">
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="var(--stone)" stroke-width="1">
-            <rect x="8" y="16" width="64" height="48" rx="8"/>
-            <path d="M8 38h64"/>
-            <rect x="20" y="24" width="16" height="10" rx="2"/>
-            <line x1="44" y1="27" x2="60" y2="27"/>
-            <line x1="44" y1="32" x2="56" y2="32"/>
-            <path d="M56 56l8 8M64 56l-8 8" stroke-width="1.5"/>
-          </svg>
-          <p data-i18n="ticketPlaceholder" data-i18n-html="true">上传照片后<br>票根将在此预览</p>
-        </div>
-      </div>
-      <div class="ticket-container" id="ticketContainer" style="display:none;">
-        <div class="ticket" id="ticket">
-          <!-- JS动态生成 -->
-        </div>
-      </div>
-      <!-- 移动端：底部浮动切换按钮 -->
-      <div class="ticket-mobile-toggle" id="ticketMobileToggle">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
-          <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
-          <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
-          <line x1="17" y1="16" x2="23" y2="16"/>
-        </svg>
-        <span><span data-i18n="ticketOptions">票根选项</span></span>
-      </div>
-    </div>
-  </div>
-
-  <!-- 移动端：底部弹窗遮罩 -->
-  <div class="ticket-mobile-backdrop" id="ticketMobileBackdrop"></div>
-</section><!-- end #page-ticket -->
-
-<!-- 9: 图片档案库 -->
-<!-- 10: 批量处理 -->
 <section class="page-section" id="page-batch" data-page="batch">
   <main class="mod-main">
-    <h2 class="mod-title" data-i18n="batchTitle">批量处理</h2>
-    <p class="mod-sub" data-i18n="batchSub">一次导入多张图片排队降噪，可随时暂停、取消、重试失败项，完成后打包下载。大图会自动分块处理。</p>
+    <h2 class="mod-title">批量处理</h2>
+    <p class="mod-sub">一次导入多张图片排队降噪，可随时暂停、取消、重试失败项，完成后打包下载。大图会自动分块处理。</p>
 
     <div class="mod-card">
       <div class="batch-zone" id="batchZone">
-        <span data-i18n="batchDropHint">点击或拖拽图片到此处导入（支持多选）</span>
+        <span>点击或拖拽图片到此处导入（支持多选）</span>
         <input type="file" id="batchFileInput" accept="image/*" multiple hidden />
       </div>
     </div>
@@ -550,57 +367,57 @@
     <div class="mod-card">
       <div class="mod-row">
         <div class="mod-field">
-          <label><span data-i18n="batchSigmaS">空间半径 σₛ</span> <span class="mod-val" id="batchSigmaSVal">5</span></label>
+          <label><span>空间半径 σₛ</span> <span class="mod-val" id="batchSigmaSVal">5</span></label>
           <input type="range" id="batchSigmaS" min="1" max="15" value="5" />
         </div>
         <div class="mod-field">
-          <label><span data-i18n="batchSigmaR">颜色阈值 σᵣ</span> <span class="mod-val" id="batchSigmaRVal">25</span></label>
+          <label><span>颜色阈值 σᵣ</span> <span class="mod-val" id="batchSigmaRVal">25</span></label>
           <input type="range" id="batchSigmaR" min="1" max="100" value="25" />
         </div>
         <div class="mod-field">
-          <label data-i18n="batchMode">降噪模式</label>
+          <label>降噪模式</label>
           <div style="display:flex; gap:0.8rem;">
-            <label class="batch-radio"><input type="radio" name="batchMode" value="bilateral" checked /> <span data-i18n="batchModeColor">彩色</span></label>
-            <label class="batch-radio"><input type="radio" name="batchMode" value="grayscale" /> <span data-i18n="batchModeGray">灰度</span></label>
+            <label class="batch-radio"><input type="radio" name="batchMode" value="bilateral" checked /> <span>彩色</span></label>
+            <label class="batch-radio"><input type="radio" name="batchMode" value="grayscale" /> <span>灰度</span></label>
           </div>
         </div>
         <div class="mod-field">
-          <label data-i18n="batchOutFormat">输出格式</label>
+          <label>输出格式</label>
           <select id="batchFormat">
-            <option value="png" data-i18n="batchFmtPng">PNG（无损）</option>
-            <option value="jpeg" data-i18n="batchFmtJpeg">JPEG（体积小）</option>
-            <option value="webp" data-i18n="batchFmtWebp">WebP</option>
+            <option value="png">PNG（无损）</option>
+            <option value="jpeg">JPEG（体积小）</option>
+            <option value="webp">WebP</option>
           </select>
         </div>
         <div class="mod-field hidden" id="batchQualityRow">
-          <label><span data-i18n="batchQuality">输出质量</span> <span class="mod-val" id="batchQualityVal">92</span></label>
+          <label><span>输出质量</span> <span class="mod-val" id="batchQualityVal">92</span></label>
           <input type="range" id="batchQuality" min="50" max="100" value="92" />
         </div>
         <div class="mod-field">
-          <label data-i18n="batchMaxPixels">单张像素上限</label>
+          <label>单张像素上限</label>
           <select id="batchMaxPixels">
-            <option value="4000000" selected data-i18n="batchPx4m">400 万（推荐，约 5 秒/张）</option>
-            <option value="8000000" data-i18n="batchPx8m">800 万（约 11 秒/张）</option>
-            <option value="12000000" data-i18n="batchPx12m">1200 万（约 16 秒/张）</option>
-            <option value="0" data-i18n="batchPxNone">不限制（大图会很慢）</option>
+            <option value="4000000" selected>400 万（推荐，约 5 秒/张）</option>
+            <option value="8000000">800 万（约 11 秒/张）</option>
+            <option value="12000000">1200 万（约 16 秒/张）</option>
+            <option value="0">不限制（大图会很慢）</option>
           </select>
         </div>
         <div class="mod-field">
-          <label data-i18n="batchTimeout">单张超时</label>
+          <label>单张超时</label>
           <select id="batchTimeout">
-            <option value="30" data-i18n="batchTimeout30">30 秒</option>
-            <option value="60" selected data-i18n="batchTimeout60">60 秒</option>
-            <option value="180" data-i18n="batchTimeout180">180 秒</option>
-            <option value="0" data-i18n="batchTimeoutNone">不限制</option>
+            <option value="30">30 秒</option>
+            <option value="60" selected>60 秒</option>
+            <option value="180">180 秒</option>
+            <option value="0">不限制</option>
           </select>
         </div>
         <div class="mod-field">
           <label class="batch-radio" style="padding-bottom:0.5rem;">
-            <input type="checkbox" id="batchSaveArchive" /> <span data-i18n="batchAutoArchive">完成后自动存入档案库</span>
+            <input type="checkbox" id="batchSaveArchive" /> <span>完成后自动存入档案库</span>
           </label>
         </div>
       </div>
-      <p style="margin:0.7rem 0 0; font-size:0.76rem; color:var(--stone); line-height:1.6;" data-i18n="batchLimitTip">
+      <p style="margin:0.7rem 0 0; font-size:0.76rem; color:var(--stone); line-height:1.6;">
         超过像素上限的图片会先等比缩小再降噪，避免单张耗时过久；超时未完成的会自动跳过并标记为失败，不拖住后面的图片。
       </p>
     </div>
@@ -612,28 +429,27 @@
 
     <div class="mod-card">
       <div class="mod-row" style="margin-bottom:1rem;">
-        <button class="mod-btn primary" id="batchStartBtn" data-i18n="batchBtnStart">开始处理</button>
-        <button class="mod-btn" id="batchPauseBtn" data-i18n="batchBtnPause">暂停</button>
-        <button class="mod-btn danger" id="batchCancelBtn" data-i18n="batchBtnCancel">取消</button>
-        <button class="mod-btn" id="batchPickBtn" data-i18n="batchBtnAdd">继续添加</button>
-        <button class="mod-btn" id="batchPackBtn" data-i18n="batchBtnPack">打包下载全部</button>
-        <button class="mod-btn danger" id="batchClearBtn" data-i18n="batchBtnClean">清理已完成</button>
+        <button class="mod-btn primary" id="batchStartBtn">开始处理</button>
+        <button class="mod-btn" id="batchPauseBtn">暂停</button>
+        <button class="mod-btn danger" id="batchCancelBtn">取消</button>
+        <button class="mod-btn" id="batchPickBtn">继续添加</button>
+        <button class="mod-btn" id="batchPackBtn">打包下载全部</button>
+        <button class="mod-btn danger" id="batchClearBtn">清理已完成</button>
       </div>
 
       <div class="batch-list" id="batchList"></div>
-      <div class="mod-empty hidden" id="batchEmpty" data-i18n="batchEmpty">还没有任务，先导入几张图片吧</div>
+      <div class="mod-empty hidden" id="batchEmpty">还没有任务，先导入几张图片吧</div>
     </div>
   </main>
 </section>
 
-<!-- 11: 图像编辑 -->
 <section class="page-section" id="page-editor" data-page="editor">
   <main class="mod-main">
-    <h2 class="mod-title" data-i18n="editorTitle">图像编辑</h2>
-    <p class="mod-sub" data-i18n="editorSub">裁剪、旋转翻转、亮度对比度饱和度调整与锐化，实时预览，可导出或存入档案库。在预览图上点击可移动裁剪框中心。</p>
+    <h2 class="mod-title">图像编辑</h2>
+    <p class="mod-sub">裁剪、旋转翻转、亮度对比度饱和度调整与锐化，实时预览，可导出或存入档案库。在预览图上点击可移动裁剪框中心。</p>
 
     <div class="editor-zone" id="editorZone">
-      <span data-i18n="editorDropHint">点击或拖拽图片到此处开始编辑</span>
+      <span>点击或拖拽图片到此处开始编辑</span>
       <input type="file" id="editorFileInput" accept="image/*" hidden />
     </div>
 
@@ -645,11 +461,11 @@
       <div class="editor-panel hidden" id="editorPanel">
         <div class="mod-card" style="margin:0;">
           <div class="editor-group" style="border-top:none; padding-top:0;">
-            <div class="editor-group-title" data-i18n="editorCrop">裁剪</div>
+            <div class="editor-group-title">裁剪</div>
             <div class="editor-slider-row">
-              <span data-i18n="editorRatio">比例</span>
+              <span>比例</span>
               <select id="editorCropRatio">
-                <option value="origin" data-i18n="editorRatioOrigin">原图比例</option>
+                <option value="origin">原图比例</option>
                 <option value="1:1">1:1 方形</option>
                 <option value="4:3">4:3</option>
                 <option value="3:2">3:2</option>
@@ -657,16 +473,16 @@
               </select>
             </div>
             <div class="editor-slider-row">
-              <span data-i18n="editorFraming">取景</span>
+              <span>取景</span>
               <input type="range" id="editorCropScale" min="30" max="100" value="100" />
               <span class="mod-val" id="editorCropScaleVal">100%</span>
             </div>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title" data-i18n="editorRotateFlip">旋转与翻转</div>
+            <div class="editor-group-title">旋转与翻转</div>
             <div class="editor-slider-row">
-              <span data-i18n="editorAngle">角度</span>
+              <span>角度</span>
               <select id="editorRotate">
                 <option value="0">0°</option>
                 <option value="90">90°</option>
@@ -675,57 +491,57 @@
               </select>
             </div>
             <div class="mod-row">
-              <button class="mod-btn" id="editorFlipH" data-i18n="editorFlipH">水平翻转</button>
-              <button class="mod-btn" id="editorFlipV" data-i18n="editorFlipV">垂直翻转</button>
+              <button class="mod-btn" id="editorFlipH">水平翻转</button>
+              <button class="mod-btn" id="editorFlipV">垂直翻转</button>
             </div>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title" data-i18n="editorColor">色彩调整</div>
+            <div class="editor-group-title">色彩调整</div>
             <div class="editor-slider-row">
-              <span data-i18n="editorBrightness">亮度</span>
+              <span>亮度</span>
               <input type="range" id="editorBrightness" min="-100" max="100" value="0" />
               <span class="mod-val" id="editorBrightnessVal">0</span>
             </div>
             <div class="editor-slider-row">
-              <span data-i18n="editorContrast">对比</span>
+              <span>对比</span>
               <input type="range" id="editorContrast" min="-100" max="100" value="0" />
               <span class="mod-val" id="editorContrastVal">0</span>
             </div>
             <div class="editor-slider-row">
-              <span data-i18n="editorSaturation">饱和</span>
+              <span>饱和</span>
               <input type="range" id="editorSaturation" min="-100" max="100" value="0" />
               <span class="mod-val" id="editorSaturationVal">0</span>
             </div>
             <div class="editor-slider-row">
-              <span data-i18n="editorSharpen">锐化</span>
+              <span>锐化</span>
               <input type="range" id="editorSharpen" min="0" max="100" value="0" />
               <span class="mod-val" id="editorSharpenVal">0</span>
             </div>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title" data-i18n="editorPreset">预设风格</div>
+            <div class="editor-group-title">预设风格</div>
             <select id="editorPreset" style="width:100%;">
-              <option value="none" data-i18n="editorPresetNone">不使用</option>
-              <option value="vivid" data-i18n="editorPresetVivid">鲜艳</option>
-              <option value="mono" data-i18n="editorPresetMono">黑白</option>
-              <option value="retro" data-i18n="editorPresetRetro">复古</option>
+              <option value="none">不使用</option>
+              <option value="vivid">鲜艳</option>
+              <option value="mono">黑白</option>
+              <option value="retro">复古</option>
             </select>
           </div>
 
           <div class="editor-group">
-            <div class="editor-group-title" data-i18n="editorOutput">输出</div>
+            <div class="editor-group-title">输出</div>
             <select id="editorFormat" style="width:100%; margin-bottom:0.6rem;">
               <option value="png">PNG</option>
               <option value="jpeg">JPEG</option>
               <option value="webp">WebP</option>
             </select>
             <div class="mod-row">
-              <button class="mod-btn primary" id="editorDownloadBtn" data-i18n="editorBtnExport">导出图片</button>
-              <button class="mod-btn" id="editorArchiveBtn" data-i18n="editorBtnArchive">存档案库</button>
-              <button class="mod-btn" id="editorPickBtn" data-i18n="editorBtnChange">更换图片</button>
-              <button class="mod-btn danger" id="editorResetBtn" data-i18n="editorBtnReset">重置参数</button>
+              <button class="mod-btn primary" id="editorDownloadBtn">导出图片</button>
+              <button class="mod-btn" id="editorArchiveBtn">存档案库</button>
+              <button class="mod-btn" id="editorPickBtn">更换图片</button>
+              <button class="mod-btn danger" id="editorResetBtn">重置参数</button>
             </div>
           </div>
         </div>
@@ -737,35 +553,34 @@
   </main>
 </section>
 
-<!-- 12: 处理日志 -->
 <section class="page-section" id="page-history" data-page="history">
   <main class="mod-main">
-    <h2 class="mod-title" data-i18n="historyTitle">处理日志</h2>
-    <p class="mod-sub" data-i18n="historySub">自动记录每一次处理的时间、参数与耗时，可筛选、搜索、导出 CSV，便于回溯与统计。</p>
+    <h2 class="mod-title">处理日志</h2>
+    <p class="mod-sub">自动记录每一次处理的时间、参数与耗时，可筛选、搜索、导出 CSV，便于回溯与统计。</p>
 
     <div class="log-stats" id="logStats"></div>
 
     <div class="log-toolbar">
       <div class="log-tabs" id="logTypeTabs">
-        <button class="log-tab active" data-value="all" data-i18n="logTabAllTypes">全部类型</button>
-        <button class="log-tab" data-value="denoise" data-i18n="logTabDenoise">图像降噪</button>
-        <button class="log-tab" data-value="batch" data-i18n="logTabBatch">批量处理</button>
-        <button class="log-tab" data-value="edit" data-i18n="logTabEdit">图像编辑</button>
-        <button class="log-tab" data-value="import" data-i18n="logTabImport">图片导入</button>
+        <button class="log-tab active" data-value="all">全部类型</button>
+        <button class="log-tab" data-value="denoise">图像降噪</button>
+        <button class="log-tab" data-value="batch">批量处理</button>
+        <button class="log-tab" data-value="edit">图像编辑</button>
+        <button class="log-tab" data-value="import">图片导入</button>
       </div>
       <div class="log-tabs" id="logStatusTabs">
-        <button class="log-tab active" data-value="all" data-i18n="logTabAllStatus">全部状态</button>
-        <button class="log-tab" data-value="success" data-i18n="logStatusSuccess">成功</button>
-        <button class="log-tab" data-value="error" data-i18n="logStatusError">失败</button>
+        <button class="log-tab active" data-value="all">全部状态</button>
+        <button class="log-tab" data-value="success">成功</button>
+        <button class="log-tab" data-value="error">失败</button>
       </div>
-      <input type="text" class="log-search" id="logSearch" data-i18n-placeholder="logSearchPh" placeholder="搜索文件名或参数…" />
-      <button class="mod-btn" id="logRefreshBtn" data-i18n="logBtnRefresh">刷新</button>
-      <button class="mod-btn primary" id="logExportBtn" data-i18n="logBtnExport">导出 CSV</button>
-      <button class="mod-btn danger" id="logClearBtn" data-i18n="logBtnClear">清空</button>
+      <input type="text" class="log-search" id="logSearch" placeholder="搜索文件名或参数…" />
+      <button class="mod-btn" id="logRefreshBtn">刷新</button>
+      <button class="mod-btn primary" id="logExportBtn">导出 CSV</button>
+      <button class="mod-btn danger" id="logClearBtn">清空</button>
     </div>
 
     <div class="log-list" id="logList"></div>
-    <div class="mod-empty hidden" id="logEmpty" data-i18n="logEmpty">暂无处理记录，去处理一张图片试试</div>
+    <div class="mod-empty hidden" id="logEmpty">暂无处理记录，去处理一张图片试试</div>
   </main>
 </section>
 
@@ -774,33 +589,33 @@
 
     <div class="archive-header">
       <div>
-        <h2 class="archive-title" data-i18n="archTitle">图片档案库</h2>
-        <p class="archive-subtitle" data-i18n="archSubtitle">管理你处理过的所有图片，全部保存在本机浏览器中</p>
+        <h2 class="archive-title">图片档案库</h2>
+        <p class="archive-subtitle">管理你处理过的所有图片，全部保存在本机浏览器中</p>
       </div>
       <div class="archive-header-actions">
         <span class="archive-storage" id="archiveStorage"></span>
-        <button class="btn btn-ghost" id="archiveImportBtn" data-i18n="archImport">导入图片</button>
-        <button class="btn btn-ghost archive-danger" id="archiveClearBtn" data-i18n="archClearAll">清空档案库</button>
+        <button class="btn btn-ghost" id="archiveImportBtn">导入图片</button>
+        <button class="btn btn-ghost archive-danger" id="archiveClearBtn">清空档案库</button>
         <input type="file" id="archiveFileInput" accept="image/*" multiple hidden />
       </div>
     </div>
 
     <div class="archive-toolbar glass-card">
-      <input type="text" class="archive-search" id="archiveSearch" data-i18n-placeholder="archSearchPlaceholder" placeholder="搜索文件名…" />
+      <input type="text" class="archive-search" id="archiveSearch" placeholder="搜索文件名…" />
       <div class="archive-tabs" id="archiveSourceTabs">
-        <button class="archive-tab active" data-source="all" data-i18n="archAll">全部</button>
-        <button class="archive-tab" data-source="denoise" data-i18n="archSrcDenoise">降噪</button>
-        <button class="archive-tab" data-source="filter" data-i18n="archSrcFilter">滤镜</button>
-        <button class="archive-tab" data-source="import" data-i18n="archSrcImport">导入</button>
+        <button class="archive-tab active" data-source="all">全部</button>
+        <button class="archive-tab" data-source="denoise">降噪</button>
+        <button class="archive-tab" data-source="filter">滤镜</button>
+        <button class="archive-tab" data-source="import">导入</button>
         <div class="archive-tab-pill" id="archiveTabPill"></div>
       </div>
       <button class="archive-fav-toggle" id="archiveFavToggle" title="只看收藏">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       </button>
       <select class="archive-sort" id="archiveSort">
-        <option value="time" data-i18n="archSortTime">按时间</option>
-        <option value="name" data-i18n="archSortName">按名称</option>
-        <option value="size" data-i18n="archSortSize">按大小</option>
+        <option value="time">按时间</option>
+        <option value="name">按名称</option>
+        <option value="size">按大小</option>
       </select>
     </div>
 
@@ -808,15 +623,14 @@
       <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
       </svg>
-      <p class="archive-empty-title" data-i18n="archEmpty">暂无归档图片</p>
-      <p class="archive-empty-hint" data-i18n="archEmptyHint">在降噪结果页或滤镜页点击「存入档案库」，或在此导入本地图片</p>
+      <p class="archive-empty-title">暂无归档图片</p>
+      <p class="archive-empty-hint">在降噪结果页或滤镜页点击「存入档案库」，或在此导入本地图片</p>
     </div>
 
     <div class="archive-grid" id="archiveGrid"></div>
 
   </main>
 
-  <!-- 预览弹窗 -->
   <div class="archive-modal-backdrop" id="archiveModalBackdrop">
     <div class="archive-modal" id="archiveModal">
       <button class="archive-modal-close" id="archiveModalClose" aria-label="关闭">&times;</button>
@@ -824,19 +638,19 @@
       <div class="archive-modal-side">
         <h3 class="archive-modal-name" id="archiveModalName">--</h3>
         <div class="archive-modal-meta">
-          <div class="archive-meta-row"><span data-i18n="archDetailSource">来源</span><em id="archiveModalSource">--</em></div>
-          <div class="archive-meta-row"><span data-i18n="archDetailSize">尺寸</span><em id="archiveModalDims">--</em></div>
-          <div class="archive-meta-row"><span data-i18n="archDetailBytes">大小</span><em id="archiveModalBytes">--</em></div>
-          <div class="archive-meta-row"><span data-i18n="archDetailDate">归档时间</span><em id="archiveModalDate">--</em></div>
+          <div class="archive-meta-row"><span>来源</span><em id="archiveModalSource">--</em></div>
+          <div class="archive-meta-row"><span>尺寸</span><em id="archiveModalDims">--</em></div>
+          <div class="archive-meta-row"><span>大小</span><em id="archiveModalBytes">--</em></div>
+          <div class="archive-meta-row"><span>归档时间</span><em id="archiveModalDate">--</em></div>
         </div>
         <div class="archive-modal-tags">
-          <label data-i18n="archTags">标签</label>
-        <input type="text" id="archiveModalTags" data-i18n-placeholder="archTagsPlaceholder" placeholder="用逗号分隔" />
+          <label>标签</label>
+        <input type="text" id="archiveModalTags" placeholder="用逗号分隔" />
         </div>
         <div class="archive-modal-actions">
-          <button class="btn btn-primary" id="archiveModalDownload" data-i18n="archDownload">下载</button>
-          <button class="btn btn-ghost" id="archiveModalFav" data-i18n="archFavBtn">收藏</button>
-          <button class="btn btn-ghost archive-danger" id="archiveModalDelete" data-i18n="archDelete">删除</button>
+          <button class="btn btn-primary" id="archiveModalDownload">下载</button>
+          <button class="btn btn-ghost" id="archiveModalFav">收藏</button>
+          <button class="btn btn-ghost archive-danger" id="archiveModalDelete">删除</button>
         </div>
       </div>
     </div>
@@ -845,153 +659,8 @@
   <div class="archive-drop-hint" id="archiveDropHint">松开鼠标，导入图片</div>
 </section>
 
+<div class="site-footer">© 2026 Young__Yang. All rights reserved.</div>
 
-<!-- 8: 设置中心 -->
-<section class="page-section" id="page-profile" data-page="profile">
-  <main class="page-main profile-main">
-    <div class="profile-container">
-      <div class="profile-header">
-        <!-- <div class="profile-avatar-wrap">
-          <div class="profile-avatar" id="profileAvatar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L3 8.5v7L12 22l9-6.5v-7L12 2z"/>
-              <path d="M12 2v20M3 8.5l9 6.5 9-6.5"/>
-            </svg>
-          </div>
-        </div> -->
-        <h1 class="profile-name" id="profileName">PrismDen</h1>
-        <p class="profile-bio" id="profileBio" data-i18n="profileBio">Hash-Accelerated Bilateral Filtering</p>
-      </div>
-      <div class="profile-body" id="profileBody">
-        <!-- 统计卡片 -->
-        <!-- <div class="profile-section">
-          <h3 class="profile-section-title"><span data-i18n="statTitle">使用统计</span></h3>
-          <div class="profile-stats">
-            <div class="stat-card"> -->
-              <!-- <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg> -->
-              <!-- <span class="stat-value" id="statDenoise">0</span>
-              <span class="stat-label" data-i18n="statDenoise">图像降噪</span>
-            </div>
-            <div class="stat-card"> -->
-              <!-- <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/>
-              </svg> -->
-              <!-- <span class="stat-value" id="statFilter">0</span>
-              <span class="stat-label" data-i18n="statFilter">创意滤镜</span>
-            </div>
-            <div class="stat-card"> -->
-              <!-- <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg> -->
-              <!-- <span class="stat-value" id="statTicket">0</span>
-              <span class="stat-label" data-i18n="statTicket">旅行票根</span>
-            </div>
-          </div>
-        </div> -->
-
-        <!-- 设置 -->
-        <div class="profile-section">
-          <h3 class="profile-section-title"><span data-i18n="settingsTitle">偏好设置</span></h3>
-          <div class="settings-list">
-            <div class="settings-item" id="themeToggle">
-              <div class="settings-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-              </div>
-              <div class="settings-info">
-                <div class="settings-name" data-i18n="settingDarkMode">深色模式</div>
-                <div class="settings-desc"><span data-i18n="darkModeAuto">跟随系统</span></div>
-              </div>
-              <div class="settings-toggle">
-                <div class="toggle-knob"></div>
-              </div>
-            </div>
-            <div class="settings-item" id="vibrateToggle">
-              <div class="settings-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M2 10v4M22 10v4M6 6v12M18 6v12M10 4v16M14 4v16"/>
-                </svg>
-              </div>
-              <div class="settings-info">
-                <div class="settings-name" data-i18n="vibrateTitle">震动反馈</div>
-                <div class="settings-desc" data-i18n="vibrateOn">已开启</div>
-              </div>
-              <span class="settings-tag"><span data-i18n="vibrateiOS">iOS设备暂不支持</span></span>
-              <div class="settings-toggle active">
-                <div class="toggle-knob"></div>
-              </div>
-            </div>
-            <div class="settings-item" id="langToggle">
-              <div class="settings-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="2" y1="12" x2="22" y2="12"/>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                </svg>
-              </div>
-              <div class="settings-info">
-                <div class="settings-name" data-i18n="langTitle">语言</div>
-                <div class="settings-desc"><span data-i18n="langZh">中文</span></div>
-              </div>
-              <div class="settings-toggle active">
-                <div class="toggle-knob"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 关于项目 -->
-        <div class="profile-section">
-          <h3 class="profile-section-title"><span data-i18n="aboutTitle">关于项目</span></h3>
-          <div class="about-card">
-            <div class="about-row">
-              <span class="about-label" data-i18n="aboutLabelName">项目名称</span>
-              <span class="about-value" data-i18n="aboutName">PrismDen · 棱镜降噪</span>
-            </div>
-            <div class="about-row">
-              <span class="about-label" data-i18n="aboutLabelAlgo">核心算法</span>
-              <span class="about-value" data-i18n="aboutAlgo">哈希加速双边滤波</span>
-            </div>
-            <div class="about-row">
-              <span class="about-label" data-i18n="featDS">数据结构</span>
-              <span class="about-value" data-i18n="aboutDS">HashMap · LinkedList · MaxHeap · Queue</span>
-            </div>
-            <div class="about-row">
-              <span class="about-label" data-i18n="aboutLabelTech">技术栈</span>
-              <span class="about-value" data-i18n="aboutTech">C++ · WebAssembly · 液态玻璃 UI</span>
-            </div>
-            <div class="about-row">
-              <span class="about-label" data-i18n="aboutLabelAuthor">作者</span>
-              <span class="about-value" data-i18n="aboutAuthor">Young__Yang</span>
-            </div>
-            <div class="about-row">
-              <span class="about-label" data-i18n="aboutLabelVersion">版本</span>
-              <span class="about-value">v1.1.3</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 数据管理 -->
-        <!-- <div class="profile-section">
-          <h3 class="profile-section-title"><span data-i18n="dataTitle">数据管理</span></h3>
-          <button class="profile-action-btn" id="clearDataBtn" data-i18n="btnClearData">清除本地使用统计</button>
-        </div> -->
-      </div>
-    </div>
-  </main>
-</section>
-
-<!-- 底部版权（固定底部，不撑开高度） -->
-<div class="site-footer" data-i18n="footer">© 2026 Young__Yang. All rights reserved.</div>
-
-<!-- Toast -->
 <div class="toast-container" id="toastContainer">
   <div class="toast hidden" id="toast"></div>
 </div>
@@ -1003,18 +672,13 @@
       <canvas id="compareResult" class="compare-canvas"></canvas>
     </div>
     <div class="compare-divider" id="compareDivider"></div>
-    <span class="compare-badge badge-left"><span data-i18n="compareOriginal">原图</span></span>
-    <span class="compare-badge badge-right"><span data-i18n="compareResult">降噪后</span></span>
+    <span class="compare-badge badge-left"><span>原图</span></span>
+    <span class="compare-badge badge-right"><span>降噪后</span></span>
     <button class="compare-close" onclick="closeCompare()">&times;</button>
   </div>
 </div>
-
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js" async></script>
-<script src="i18n.js"></script>
 <script src="main.js"></script>
-<!-- filter.js 已随创意滤镜模块归档到 _parked/，暂不加载 -->
-<script src="profile.js"></script>
-<!-- palette.js 已随色卡模块归档到 _parked/，暂不加载 -->
+
 <script src="history.js"></script>
 <script src="batch.js"></script>
 <script src="editor.js"></script>

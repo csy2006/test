@@ -1,51 +1,35 @@
-/* ============================================================
- * 图像编辑工具集 editor.js
- * 职责：裁剪（比例/区域）· 旋转翻转 · 亮度对比度饱和度 · 锐化 · 预设滤镜
- * 实现：全部基于 Canvas 2D，处理结果可下载 / 存入档案库 / 写处理日志
- * 管线：原图 canvas → 裁剪 → 几何变换 → 像素调整（亮度/对比度/饱和度/锐化）→ 输出
- * ============================================================ */
+
 (function () {
   'use strict';
 
-  var srcImg = null;        // 原始 Image
-  var srcCanvas = null;     // 原始 canvas（编辑基线）
-  var workCanvas = null;    // 当前结果 canvas
-  var params = null;        // 当前参数
+  var srcImg = null;
+  var srcCanvas = null;
+  var workCanvas = null;
+  var params = null;
   var defaultParams = null;
   var el = {};
-
-  /** 取翻译文本，支持 {占位符} 替换 */
-  function tr(key, vars) {
-    if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, vars);
-    return key;
-  }
 
   function toast(msg, type) {
     if (typeof window.showToast === 'function') window.showToast(msg, type || 'info');
   }
 
-  /* ────────── 参数默认值 ────────── */
-
   function makeDefaultParams() {
     return {
-      cropRatio: 'origin',   // origin | 1:1 | 4:3 | 3:2 | 16:9
-      cropScale: 1,          // 裁剪框缩放（0.3 ~ 1）
-      cropX: 0.5,            // 裁剪中心相对位置 0~1
+      cropRatio: 'origin',
+      cropScale: 1,
+      cropX: 0.5,
       cropY: 0.5,
-      rotate: 0,             // 0 | 90 | 180 | 270
+      rotate: 0,
       flipH: false,
       flipV: false,
-      brightness: 0,         // -100 ~ 100
-      contrast: 0,           // -100 ~ 100
-      saturation: 0,         // -100 ~ 100
-      sharpen: 0,            // 0 ~ 100
-      preset: 'none'         // none | vivid | mono | retro
+      brightness: 0,
+      contrast: 0,
+      saturation: 0,
+      sharpen: 0,
+      preset: 'none'
     };
   }
 
-  /* ────────── 几何处理 ────────── */
-
-  /** 按比例 + 缩放 + 中心点计算裁剪矩形 */
   function cropRect(w, h, p) {
     var ratioMap = { '1:1': 1, '4:3': 4 / 3, '3:2': 3 / 2, '16:9': 16 / 9 };
     var target = ratioMap[p.cropRatio];
@@ -55,7 +39,7 @@
       cw = w * p.cropScale;
       ch = h * p.cropScale;
     } else {
-      // 在原始尺寸内取满足比例的最大框，再按 cropScale 缩放
+
       var baseW = w, baseH = w / target;
       if (baseH > h) { baseH = h; baseW = h * target; }
       cw = baseW * p.cropScale;
@@ -73,7 +57,6 @@
     return { x: x, y: y, w: cw, h: ch };
   }
 
-  /** 裁剪 + 旋转翻转，返回新 canvas */
   function applyGeometry(src, p) {
     var rect = cropRect(src.width, src.height, p);
 
@@ -96,9 +79,6 @@
     return out;
   }
 
-  /* ────────── 像素处理 ────────── */
-
-  /** 亮度 / 对比度 / 饱和度：逐像素线性映射 */
   function applyColor(canvas, p) {
     if (!p.brightness && !p.contrast && !p.saturation) return canvas;
 
@@ -106,19 +86,17 @@
     var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     var d = imgData.data;
 
-    var b = p.brightness * 2.55;                       // -255 ~ 255
-    var c = (p.contrast + 100) / 100;                  // 0 ~ 2
+    var b = p.brightness * 2.55;
+    var c = (p.contrast + 100) / 100;
     var cFactor = Math.pow(c, 2);
-    var s = (p.saturation + 100) / 100;                // 0 ~ 2
+    var s = (p.saturation + 100) / 100;
 
-    // 预生成亮度查找表
     var lut = new Uint8ClampedArray(256);
     for (var i = 0; i < 256; i++) {
       var v = (i - 128) * cFactor + 128 + b;
       lut[i] = v < 0 ? 0 : (v > 255 ? 255 : v);
     }
 
-    // 常用灰度系数，避免每像素重复计算
     var RW = 0.299, RG = 0.587, RB = 0.114;
 
     for (var idx = 0; idx < d.length; idx += 4) {
@@ -142,7 +120,6 @@
     return canvas;
   }
 
-  /** Unsharp Mask 锐化：原图 + amount × (原图 − 模糊图) */
   function applySharpen(canvas, amount) {
     if (!amount) return canvas;
 
@@ -151,7 +128,6 @@
     var src = ctx.getImageData(0, 0, w, h);
     var s = src.data;
 
-    // 3×3 均值模糊作为低频底图
     var blur = new Uint8ClampedArray(s.length);
     var kernelSum = 9;
     for (var y = 0; y < h; y++) {
@@ -173,7 +149,7 @@
       }
     }
 
-    var strength = amount / 100 * 1.6;   // 0 ~ 1.6
+    var strength = amount / 100 * 1.6;
     for (var i = 0; i < s.length; i += 4) {
       s[i] = Math.min(255, Math.max(0, s[i] + (s[i] - blur[i]) * strength));
       s[i + 1] = Math.min(255, Math.max(0, s[i + 1] + (s[i + 1] - blur[i + 1]) * strength));
@@ -184,7 +160,6 @@
     return canvas;
   }
 
-  /** 预设风格：在调色参数基础上叠加一组推荐值 */
   function presetParams(name) {
     switch (name) {
       case 'vivid': return { brightness: 5, contrast: 18, saturation: 35, sharpen: 20 };
@@ -194,26 +169,21 @@
     }
   }
 
-  /* ────────── 渲染流程 ────────── */
-
   function render() {
-    // 注意：workCanvas 由本函数产出，首次调用时必然为 null，不能作为前置条件
+
     if (!srcCanvas || !params) return;
 
     var started = performance.now();
 
-    // 1. 几何（裁剪 + 旋转翻转）
     var geo = applyGeometry(srcCanvas, params);
 
-    // 2. 调色
     applyColor(geo, params);
 
-    // 3. 锐化
     applySharpen(geo, params.sharpen);
 
     var display = document.getElementById('editorCanvas');
     if (display) {
-      // 预览：按容器宽度等比缩放
+
       var maxW = display.parentElement ? display.parentElement.clientWidth : 720;
       var scale = Math.min(1, maxW / geo.width);
       display.width = Math.max(1, Math.round(geo.width * scale));
@@ -228,15 +198,9 @@
 
     var info = document.getElementById('editorInfo');
     if (info) {
-      info.textContent = tr('editorInfo', {
-        w: geo.width, h: geo.height,
-        ow: srcCanvas.width, oh: srcCanvas.height,
-        ms: Math.round(performance.now() - started)
-      });
+      info.textContent = '输出尺寸 ' + geo.width + ' × ' + geo.height + '（原图 ' + srcCanvas.width + ' × ' + srcCanvas.height + '）· 本次渲染 ' + Math.round(performance.now() - started) + ' ms';
     }
   }
-
-  /* ────────── 载入图片 ────────── */
 
   function loadFile(file) {
     var reader = new FileReader();
@@ -265,19 +229,17 @@
             type: 'import', name: file.name,
             width: img.naturalWidth, height: img.naturalHeight,
             status: 'success', elapsed: 0,
-            params: { source: tr('editorLogImportSrc') }
+            params: { source: '编辑器导入' }
           });
         }
       };
       img.onerror = function () {
-        toast(tr('batchErrDecode'), 'error');
+        toast('图片解码失败', 'error');
       };
       img.src = reader.result;
     };
     reader.readAsDataURL(file);
   }
-
-  /* ────────── 控件同步 ────────── */
 
   function syncControls() {
     if (!params) return;
@@ -321,15 +283,13 @@
     params.cropScale = parseInt(document.getElementById('editorCropScale').value, 10) / 100;
   }
 
-  /* ────────── 输出 ────────── */
-
   function exportBlob() {
     return new Promise(function (resolve, reject) {
-      if (!workCanvas) { reject(new Error(tr('editorNoImage'))); return; }
+      if (!workCanvas) { reject(new Error('没有可导出的图像')); return; }
       var fmt = document.getElementById('editorFormat').value;
       var mime = fmt === 'jpeg' ? 'image/jpeg' : fmt === 'webp' ? 'image/webp' : 'image/png';
       workCanvas.toBlob(function (b) {
-        b ? resolve(b) : reject(new Error(tr('batchErrExport')));
+        b ? resolve(b) : reject(new Error('结果导出失败'));
       }, mime, 0.95);
     });
   }
@@ -347,14 +307,14 @@
       name: document.getElementById('editorFileName').textContent || '编辑结果',
       params: (function () {
         var p = {};
-        p[tr('editorLogCrop')] = params.cropRatio;
-        p[tr('editorLogRotate')] = tr('editorLogDegree', { n: params.rotate });
-        p[tr('editorLogFlip')] = (params.flipH ? 'H' : '') + (params.flipV ? 'V' : '') || tr('editorLogFlipNone');
-        p[tr('editorBrightness')] = params.brightness;
-        p[tr('editorContrast')] = params.contrast;
-        p[tr('editorSaturation')] = params.saturation;
-        p[tr('editorSharpen')] = params.sharpen;
-        p[tr('editorLogPreset')] = params.preset;
+        p['裁剪'] = params.cropRatio;
+        p['旋转'] = params.rotate + '°';
+        p['翻转'] = (params.flipH ? 'H' : '') + (params.flipV ? 'V' : '') || '无';
+        p['亮度'] = params.brightness;
+        p['对比'] = params.contrast;
+        p['饱和'] = params.saturation;
+        p['锐化'] = params.sharpen;
+        p['预设'] = params.preset;
         return p;
       })(),
       width: workCanvas ? workCanvas.width : 0,
@@ -364,8 +324,6 @@
       error: err || ''
     });
   }
-
-  /* ────────── 初始化 ────────── */
 
   function init() {
     el = {
@@ -399,7 +357,6 @@
       if (e.dataTransfer && e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
     });
 
-    // 参数控件
     ['editorCropRatio', 'editorRotate', 'editorCropScale',
       'editorBrightness', 'editorContrast', 'editorSaturation', 'editorSharpen'
     ].forEach(function (id) {
@@ -417,7 +374,6 @@
       });
     });
 
-    // 预设
     var presetNode = document.getElementById('editorPreset');
     if (presetNode) {
       presetNode.addEventListener('change', function () {
@@ -432,13 +388,11 @@
       });
     }
 
-    // 翻转
     var flipH = document.getElementById('editorFlipH');
     var flipV = document.getElementById('editorFlipV');
     if (flipH) flipH.addEventListener('click', function () { params.flipH = !params.flipH; render(); });
     if (flipV) flipV.addEventListener('click', function () { params.flipV = !params.flipV; render(); });
 
-    // 裁剪中心：在预览图上点击移动裁剪框中心
     var stage = document.getElementById('editorCanvas');
     if (stage) {
       stage.addEventListener('click', function (e) {
@@ -450,7 +404,6 @@
       });
     }
 
-    // 重置
     var reset = document.getElementById('editorResetBtn');
     if (reset) {
       reset.addEventListener('click', function () {
@@ -458,11 +411,10 @@
         params = JSON.parse(JSON.stringify(defaultParams));
         syncControls();
         render();
-        toast(tr('editorResetInfo'), 'info');
+        toast('已恢复初始参数', 'info');
       });
     }
 
-    // 下载
     var dl = document.getElementById('editorDownloadBtn');
     if (dl) {
       dl.addEventListener('click', function () {
@@ -477,7 +429,7 @@
           document.body.removeChild(a);
           setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
           logEdit('success', Math.round(performance.now() - t0));
-          toast(tr('editorExported'), 'success');
+          toast('已导出图片', 'success');
         }).catch(function (err) {
           logEdit('error', Math.round(performance.now() - t0), err.message);
           toast(err.message, 'error');
@@ -485,21 +437,20 @@
       });
     }
 
-    // 存入档案库
     var save = document.getElementById('editorArchiveBtn');
     if (save) {
       save.addEventListener('click', function () {
         var t0 = performance.now();
         exportBlob().then(function (blob) {
           if (!window.PrismDenArchive) {
-            toast(tr('editorNoArchive'), 'error');
+            toast('档案库模块未加载', 'error');
             return;
           }
           return window.PrismDenArchive.save(blob, {
             name: currentOutName(), source: 'edit', tags: ['编辑']
           }).then(function () {
             logEdit('success', Math.round(performance.now() - t0));
-            toast(tr('archSaved'), 'success');
+            toast('已存入档案库', 'success');
           });
         }).catch(function (err) {
           toast(err.message, 'error');
@@ -508,7 +459,6 @@
     }
   }
 
-  // 拖动滑块时降频渲染，避免大图卡顿
   var _renderTimer = null;
   function scheduleRender() {
     if (_renderTimer) clearTimeout(_renderTimer);
@@ -522,7 +472,6 @@
     hasImage: function () { return !!srcCanvas; }
   };
 
-  // 语言切换后刷新尺寸信息文案（若已有图片）
   (window._langChangeHooks = window._langChangeHooks || []).push(function () {
     if (srcCanvas) render();
   });

@@ -1,9 +1,4 @@
-/* ============================================================
- * 处理日志 history.js
- * 职责：记录每一次图像处理（降噪 / 编辑 / 批量 / 导入）的完整参数与耗时，
- *      支持按类型与状态筛选、关键词搜索、统计汇总、CSV 导出
- * 存储：IndexedDB，库名 prismden_logs，对象仓 logs
- * ============================================================ */
+
 (function () {
   'use strict';
 
@@ -11,24 +6,16 @@
   var DB_VERSION = 1;
   var STORE = 'logs';
   var db = null;
-  var cache = [];          // 内存缓存（时间倒序）
+  var cache = [];
   var filterType = 'all';
   var filterStatus = 'all';
   var keyword = '';
 
   var el = {};
 
-  /** 取翻译文本，支持 {占位符} 替换 */
-  function tr(key, vars) {
-    if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, vars);
-    return key;
-  }
-
   function toast(msg, type) {
     if (typeof window.showToast === 'function') window.showToast(msg, type || 'info');
   }
-
-  /* ────────── IndexedDB ────────── */
 
   function openDB() {
     if (db) return Promise.resolve(db);
@@ -92,23 +79,17 @@
     });
   }
 
-  /* ────────── 写入日志 ────────── */
-
-  /**
-   * 记录一条处理日志
-   * @param {Object} info { type, name, params, width, height, elapsed, status, error, thumb }
-   */
   function addLog(info) {
     info = info || {};
     var record = {
       id: 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-      type: info.type || 'other',          // denoise | edit | batch | import | other
+      type: info.type || 'other',
       name: info.name || '未命名',
       params: info.params || {},
       width: info.width || 0,
       height: info.height || 0,
       elapsed: info.elapsed || 0,
-      status: info.status || 'success',    // success | error
+      status: info.status || 'success',
       error: info.error || '',
       thumb: info.thumb || '',
       createdAt: Date.now()
@@ -118,8 +99,6 @@
       console.warn('[history] 写入失败', e);
     });
   }
-
-  /* ────────── 查询 ────────── */
 
   function refresh() {
     return dbGetAll().then(function (rows) {
@@ -143,16 +122,13 @@
     });
   }
 
-  /* ────────── 渲染 ────────── */
-
-  /* 类型文案：每次渲染时现取，保证跟随当前语言 */
-  var TYPE_KEY = {
-    denoise: 'logTypeDenoise', edit: 'logTypeEdit', batch: 'logTypeBatch',
-    import: 'logTypeImport', other: 'logTypeOther'
+  var TYPE_TEXT = {
+    denoise: '图像降噪', edit: '图像编辑', batch: '批量处理',
+    import: '图片导入', other: '其他'
   };
 
   function typeText(type) {
-    return tr(TYPE_KEY[type] || 'logTypeOther');
+    return TYPE_TEXT[type] || '其他';
   }
 
   function fmtDateTime(ts) {
@@ -163,14 +139,14 @@
   }
 
   function fmtParams(params) {
-    if (!params) return tr('logParamsNone');
+    if (!params) return '-';
     var parts = [];
     Object.keys(params).forEach(function (k) {
       var v = params[k];
       if (v === '' || v === null || typeof v === 'undefined') return;
       parts.push(k + '=' + v);
     });
-    return parts.length ? parts.join(' · ') : tr('logParamsNone');
+    return parts.length ? parts.join(' · ') : '-';
   }
 
   function render() {
@@ -192,7 +168,7 @@
 
       var thumbHtml = r.thumb
         ? '<img src="' + r.thumb + '" alt="" />'
-        : '<div class="log-thumb-ph">' + tr('logNoThumb') + '</div>';
+        : '<div class="log-thumb-ph">' + '无图' + '</div>';
 
       item.innerHTML =
         '<div class="log-thumb">' + thumbHtml + '</div>' +
@@ -200,18 +176,18 @@
           '<div class="log-line1">' +
             '<span class="log-type">' + typeText(r.type) + '</span>' +
             '<span class="log-name" title="' + r.name + '">' + r.name + '</span>' +
-            '<span class="log-status">' + (r.status === 'success' ? tr('logStatusSuccess') : tr('logStatusError')) + '</span>' +
+            '<span class="log-status">' + (r.status === 'success' ? '成功' : '失败') + '</span>' +
           '</div>' +
           '<div class="log-line2">' +
             '<span>' + fmtDateTime(r.createdAt) + '</span>' +
             (r.width ? '<span>' + r.width + '×' + r.height + '</span>' : '') +
-            (r.elapsed ? '<span>' + tr('logElapsed', { ms: r.elapsed }) + '</span>' : '') +
+            (r.elapsed ? '<span>' + '耗时 ' + r.elapsed + ' ms' + '</span>' : '') +
           '</div>' +
           '<div class="log-line3">' + fmtParams(r.params) +
             (r.error ? ' <span class="log-err">（' + r.error + '）</span>' : '') +
           '</div>' +
         '</div>' +
-        '<button class="log-del" title="' + tr('logDelTitle') + '">×</button>';
+        '<button class="log-del" title="' + '删除这条记录' + '">×</button>';
 
       item.querySelector('.log-del').addEventListener('click', function (e) {
         e.stopPropagation();
@@ -237,19 +213,17 @@
     var pixels = cache.reduce(function (s, r) { return s + (r.width && r.height ? r.width * r.height : 0); }, 0);
 
     el.stats.innerHTML =
-      '<div class="log-stat"><span class="log-stat-num">' + total + '</span><span>' + tr('logStatTotal') + '</span></div>' +
-      '<div class="log-stat ok"><span class="log-stat-num">' + ok + '</span><span>' + tr('logStatSuccess') + '</span></div>' +
-      '<div class="log-stat err"><span class="log-stat-num">' + err + '</span><span>' + tr('logStatFailed') + '</span></div>' +
-      '<div class="log-stat"><span class="log-stat-num">' + avg + '<i>ms</i></span><span>' + tr('logStatAvg') + '</span></div>' +
-      '<div class="log-stat"><span class="log-stat-num">' + (pixels / 1e6).toFixed(1) + '<i>MP</i></span><span>' + tr('logStatPixels') + '</span></div>';
+      '<div class="log-stat"><span class="log-stat-num">' + total + '</span><span>' + '总记录' + '</span></div>' +
+      '<div class="log-stat ok"><span class="log-stat-num">' + ok + '</span><span>' + '成功' + '</span></div>' +
+      '<div class="log-stat err"><span class="log-stat-num">' + err + '</span><span>' + '失败' + '</span></div>' +
+      '<div class="log-stat"><span class="log-stat-num">' + avg + '<i>ms</i></span><span>' + '平均耗时' + '</span></div>' +
+      '<div class="log-stat"><span class="log-stat-num">' + (pixels / 1e6).toFixed(1) + '<i>MP</i></span><span>' + '累计像素' + '</span></div>';
   }
-
-  /* ────────── CSV 导出 ────────── */
 
   function exportCSV() {
     var rows = filtered();
     if (!rows.length) {
-      toast(tr('logExportEmpty'), 'error');
+      toast('没有可导出的记录', 'error');
       return;
     }
 
@@ -259,8 +233,8 @@
     }
 
     var head = [
-      tr('logCsvNo'), tr('logCsvTime'), tr('logCsvType'), tr('logCsvName'), tr('logCsvStatus'),
-      tr('logCsvElapsed'), tr('logCsvWidth'), tr('logCsvHeight'), tr('logCsvParams'), tr('logCsvError')
+      '序号', '时间', '类型', '文件名', '状态',
+      '耗时(ms)', '宽度', '高度', '参数', '错误信息'
     ];
     var lines = [head.map(esc).join(',')];
 
@@ -270,7 +244,7 @@
         fmtDateTime(r.createdAt),
         typeText(r.type),
         r.name,
-        r.status === 'success' ? tr('logStatusSuccess') : tr('logStatusError'),
+        r.status === 'success' ? '成功' : '失败',
         r.elapsed || 0,
         r.width || '',
         r.height || '',
@@ -279,7 +253,6 @@
       ].map(esc).join(','));
     });
 
-    // 加 BOM，避免 Excel 打开中文乱码
     var csv = '\uFEFF' + lines.join('\r\n');
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     var url = URL.createObjectURL(blob);
@@ -291,10 +264,8 @@
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
 
-    toast(tr('logExported', { n: rows.length }), 'success');
+    toast('已导出 ' + rows.length + ' 条记录', 'success');
   }
-
-  /* ────────── 初始化 ────────── */
 
   function init() {
     el = {
@@ -341,22 +312,20 @@
     if (el.btnClear) {
       el.btnClear.addEventListener('click', function () {
         if (!cache.length) return;
-        if (!window.confirm(tr('logClearConfirm', { n: cache.length }))) return;
+        if (!window.confirm('确定清空全部 ' + cache.length + ' 条处理日志？此操作不可恢复。')) return;
         dbClear().then(function () {
           cache = [];
           render();
-          toast(tr('logCleared'), 'info');
+          toast('日志已清空', 'info');
         });
       });
     }
 
     refresh();
 
-    // 语言切换后重渲染日志列表与统计
     (window._langChangeHooks = window._langChangeHooks || []).push(function () { render(); });
   }
 
-  /* 对外 API：其他模块调用 add() 写日志 */
   window.PrismDenLog = {
     add: addLog,
     count: function () { return cache.length; },

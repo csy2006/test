@@ -1,24 +1,15 @@
-/* ============================================================
- * 批量处理队列 batch.js
- * 职责：多图排队降噪 → 进度/取消/重试 → 结果打包下载
- * 依赖：window.PrismDenDenoise（main.js 暴露的降噪核心）
- *       window.PrismDenArchive（可选，完成后存入档案库）
- *       window.PrismDenLog（可选，写处理日志）
- * 存储：不落盘，任务状态仅存内存；产物通过下载或档案库持久化
- * ============================================================ */
+
 (function () {
   'use strict';
 
-  var tasks = [];          // 任务队列
-  var running = false;     // 队列是否在运行
-  var paused = false;      // 是否暂停（当前任务完成后停）
-  var cancelFlag = false;  // 是否取消
+  var tasks = [];
+  var running = false;
+  var paused = false;
+  var cancelFlag = false;
   var seq = 0;
-  var _abortWaiters = [];  // 取消时唤醒等待中的处理 Promise
+  var _abortWaiters = [];
 
-  var el = {};             // DOM 缓存
-
-  /* ────────── 工具 ────────── */
+  var el = {};
 
   function uid() {
     return 'b' + Date.now().toString(36) + (seq++).toString(36) +
@@ -75,14 +66,6 @@
     if (typeof window.showToast === 'function') window.showToast(msg, type || 'info');
   }
 
-  /** 取翻译文本，支持 {占位符} 替换 */
-  function tr(key, vars) {
-    if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, vars);
-    return key;
-  }
-
-  /* ────────── ZIP 打包（store 模式，无压缩） ────────── */
-
   var CRC_TABLE = (function () {
     var table = new Uint32Array(256);
     for (var i = 0; i < 256; i++) {
@@ -103,10 +86,9 @@
     return (c ^ 0xFFFFFFFF) >>> 0;
   }
 
-  /** 把若干 [{name, blob}] 打成一个 zip（仅存储，不压缩，PNG/JPEG 本身已压缩） */
   function buildZip(entries) {
-    var parts = [];        // 每段：本地文件头 + 数据
-    var central = [];      // 中央目录记录
+    var parts = [];
+    var central = [];
     var offset = 0;
 
     function dosTime(d) {
@@ -127,30 +109,28 @@
         var nameBytes = new TextEncoder().encode(f.name);
         var crc = crc32(f.data);
 
-        // 本地文件头
         var local = new Uint8Array(30 + nameBytes.length);
         var dv = new DataView(local.buffer);
-        dv.setUint32(0, 0x04034b50, true);   // 签名
-        dv.setUint16(4, 20, true);           // 解压所需版本
-        dv.setUint16(6, 0x0800, true);       // 标志：UTF-8 文件名
-        dv.setUint16(8, 0, true);            // 方法 0 = store
+        dv.setUint32(0, 0x04034b50, true);
+        dv.setUint16(4, 20, true);
+        dv.setUint16(6, 0x0800, true);
+        dv.setUint16(8, 0, true);
         dv.setUint16(10, dt.time, true);
         dv.setUint16(12, dt.date, true);
         dv.setUint32(14, crc, true);
         dv.setUint32(18, f.data.length, true);
         dv.setUint32(22, f.data.length, true);
         dv.setUint16(26, nameBytes.length, true);
-        dv.setUint16(28, 0, true);           // 扩展字段长度
+        dv.setUint16(28, 0, true);
         local.set(nameBytes, 30);
 
         parts.push(local, f.data);
 
-        // 中央目录记录
         var cen = new Uint8Array(46 + nameBytes.length);
         var cv = new DataView(cen.buffer);
         cv.setUint32(0, 0x02014b50, true);
-        cv.setUint16(4, 20, true);           // 生成版本
-        cv.setUint16(6, 20, true);           // 解压所需版本
+        cv.setUint16(4, 20, true);
+        cv.setUint16(6, 20, true);
         cv.setUint16(8, 0x0800, true);
         cv.setUint16(10, 0, true);
         cv.setUint16(12, dt.time, true);
@@ -159,19 +139,18 @@
         cv.setUint32(20, f.data.length, true);
         cv.setUint32(24, f.data.length, true);
         cv.setUint16(28, nameBytes.length, true);
-        cv.setUint16(30, 0, true);           // 扩展
-        cv.setUint16(32, 0, true);           // 注释
-        cv.setUint16(34, 0, true);           // 磁盘号
-        cv.setUint16(36, 0, true);           // 内部属性
-        cv.setUint32(38, 0, true);           // 外部属性
-        cv.setUint32(42, offset, true);      // 本地头偏移
+        cv.setUint16(30, 0, true);
+        cv.setUint16(32, 0, true);
+        cv.setUint16(34, 0, true);
+        cv.setUint16(36, 0, true);
+        cv.setUint32(38, 0, true);
+        cv.setUint32(42, offset, true);
         cen.set(nameBytes, 46);
 
         central.push(cen);
         offset += local.length + f.data.length;
       });
 
-      // EOCD
       var centralSize = central.reduce(function (s, c) { return s + c.length; }, 0);
       var eocd = new Uint8Array(22);
       var ev = new DataView(eocd.buffer);
@@ -199,8 +178,6 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
   }
 
-  /* ────────── 任务管理 ────────── */
-
   function addFiles(fileList) {
     var added = 0;
     Array.prototype.forEach.call(fileList, function (f) {
@@ -210,7 +187,7 @@
         file: f,
         name: f.name,
         size: f.size,
-        status: 'pending',       // pending | running | done | error | cancelled
+        status: 'pending',
         progress: 0,
         elapsed: 0,
         thumb: '',
@@ -223,16 +200,16 @@
     });
     if (added) {
       render();
-      toast(tr('batchAdded', { n: added }), 'success');
+      toast('已加入 ' + added + ' 个文件', 'success');
     } else {
-      toast(tr('batchNoImage'), 'error');
+      toast('未识别到图片文件', 'error');
     }
   }
 
   function removeTask(id) {
     var t = findTask(id);
     if (!t) return;
-    if (t.status === 'running') { toast(tr('batchRunningWarn'), 'error'); return; }
+    if (t.status === 'running') { toast('正在处理，请先暂停或取消', 'error'); return; }
     tasks = tasks.filter(function (x) { return x.id !== id; });
     render();
   }
@@ -247,8 +224,6 @@
     render();
   }
 
-  /* ────────── 单个任务处理 ────────── */
-
   function currentParams() {
     return {
       sigmaS: parseInt(el.sigmaS.value, 10),
@@ -256,16 +231,11 @@
       mode: (document.querySelector('input[name="batchMode"]:checked') || {}).value || 'bilateral',
       format: el.format.value,
       quality: parseInt(el.quality.value, 10) / 100,
-      maxPixels: parseInt(el.maxPixels.value, 10),      // 0 = 不限制
-      timeoutSec: parseInt(el.timeout.value, 10)        // 单张超时秒数，0 = 不限
+      maxPixels: parseInt(el.maxPixels.value, 10),
+      timeoutSec: parseInt(el.timeout.value, 10)
     };
   }
 
-  /**
-   * 大图保护：像素数超过上限时等比缩小。
-   * 降噪耗时随像素数线性增长，手机原图（1200 万像素）单张可达数十秒，
-   * 不设上限时批量队列会长时间无响应。
-   */
   function limitSize(canvas, maxPixels) {
     var px = canvas.width * canvas.height;
     if (!maxPixels || px <= maxPixels) return { canvas: canvas, scaled: false, scale: 1 };
@@ -288,7 +258,6 @@
       var started = performance.now();
       var tickTimer = null;
 
-      // 秒级计时：分块之间进度不跳，靠这个让用户知道还在算
       function startTick() {
         stopTick();
         tickTimer = setInterval(function () {
@@ -318,15 +287,14 @@
         t.srcHeight = img.naturalHeight;
         render();
 
-        if (!window.PrismDenDenoise) throw new Error(tr('batchErrNoCore'));
+        if (!window.PrismDenDenoise) throw new Error('降噪核心未就绪');
 
-        // 大图保护：超过上限先等比缩小
         var limited = limitSize(srcCanvas, params.maxPixels);
         t.width = limited.canvas.width;
         t.height = limited.canvas.height;
         t.scaled = limited.scaled;
         if (limited.scaled) {
-          t.note = tr('batchScaledNote', { w: t.srcWidth, h: t.srcHeight });
+          t.note = '原图 ' + t.srcWidth + '×' + t.srcHeight + '，已缩至上限内';
           render();
         }
 
@@ -342,7 +310,6 @@
           }
         });
 
-        // 单张超时保护：超时则中止 worker，避免无限等待
         var timed = runPromise;
         if (params.timeoutSec) {
           timed = new Promise(function (res, rej) {
@@ -350,14 +317,13 @@
               if (window.PrismDenDenoise && window.PrismDenDenoise.abort) {
                 window.PrismDenDenoise.abort();
               }
-              rej(new Error(tr('batchErrTimeout', { n: params.timeoutSec })));
+              rej(new Error('单张超过 ' + params.timeoutSec + ' 秒未完，已跳过'));
             }, params.timeoutSec * 1000);
             runPromise.then(function (v) { clearTimeout(timer); res(v); },
                             function (e) { clearTimeout(timer); rej(e); });
           });
         }
 
-        // 取消信号：worker 被硬终止后，等待中的 Promise 需要被叫醒，否则队列永久挂起
         var aborted = new Promise(function (res, rej) { _abortWaiters.push(rej); });
 
         return Promise.race([timed, aborted]);
@@ -369,7 +335,7 @@
 
         return new Promise(function (res, rej) {
           outCanvas.toBlob(function (b) {
-            b ? res(b) : rej(new Error(tr('batchErrExport')));
+            b ? res(b) : rej(new Error('结果导出失败'));
           }, mime, params.quality);
         }).then(function (blob) {
           t.blob = blob;
@@ -378,16 +344,15 @@
           t.status = 'done';
           t.progress = 100;
 
-          // 写日志
           if (window.PrismDenLog) {
             window.PrismDenLog.add({
               type: 'batch',
               name: t.name,
             params: {
               sigmaS: params.sigmaS, sigmaR: params.sigmaR, mode: params.mode, format: params.format,
-              [tr('batchLogScaled')]: t.scaled
-                ? tr('batchLogYes', { w: t.srcWidth, h: t.srcHeight })
-                : tr('batchLogNo')
+              ['缩放']: t.scaled
+                ? '是（原 ' + t.srcWidth + '×' + t.srcHeight + '）'
+                : '否'
             },
             width: t.width, height: t.height,
               elapsed: t.elapsed,
@@ -396,7 +361,6 @@
             });
           }
 
-          // 存入档案库
           if (el.saveArchive && el.saveArchive.checked && window.PrismDenArchive) {
             window.PrismDenArchive.save(blob, {
               name: t.outName,
@@ -425,12 +389,10 @@
     });
   }
 
-  /* ────────── 队列调度 ────────── */
-
   async function startQueue() {
     if (running) return;
     var pending = tasks.filter(function (t) { return t.status === 'pending' || t.status === 'error'; });
-    if (!pending.length) { toast(tr('batchQueueEmpty'), 'error'); return; }
+    if (!pending.length) { toast('队列为空', 'error'); return; }
 
     running = true;
     paused = false;
@@ -450,7 +412,7 @@
       t.status = 'running';
       t.error = '';
       t.progress = 0;
-      setQueueInfo(tr('batchProcessing', { i: i + 1, n: tasks.length, name: t.name }));
+      setQueueInfo('正在处理第 ' + i + 1 + '/' + tasks.length + ' 张：' + t.name);
       render();
 
       await processOne(t, params);
@@ -468,28 +430,28 @@
 
     var doneCount = tasks.filter(function (t) { return t.status === 'done'; }).length;
     var errCount = tasks.filter(function (t) { return t.status === 'error'; }).length;
-    if (cancelFlag) toast(tr('batchCancelInfo', { n: doneCount }), 'info');
-    else if (paused) toast(tr('batchPauseInfo'), 'info');
-    else toast(tr('batchFinishInfo', { n: doneCount }) +
-      (errCount ? tr('batchFinishErr', { n: errCount }) : ''), 'success');
+    if (cancelFlag) toast('已取消，完成 ' + doneCount + ' 个', 'info');
+    else if (paused) toast('已暂停', 'info');
+    else toast('队列处理完毕：成功 ' + doneCount + ' 个' +
+      (errCount ? '，失败 ' + errCount + ' 个' : ''), 'success');
   }
 
   function pauseQueue() {
     if (!running) return;
     paused = true;
     syncButtons();
-    toast(tr('batchPauseWait'), 'info');
+    toast('将在当前任务完成后暂停', 'info');
   }
 
   function cancelQueue() {
     if (!running) return;
     cancelFlag = true;
     paused = false;
-    // 硬中断：终止 worker，避免还要等当前分块算完
+
     if (window.PrismDenDenoise && window.PrismDenDenoise.abort) {
       window.PrismDenDenoise.abort();
     }
-    // 叫醒正在等待的处理 Promise，否则队列会永久挂起
+
     _abortWaiters.forEach(function (rej) { rej(new Error('已取消')); });
     _abortWaiters = [];
     syncButtons();
@@ -504,18 +466,15 @@
     render();
   }
 
-  /* ────────── 渲染 ────────── */
-
-  /* 状态文案：每次渲染时现取，保证跟随当前语言 */
   function statusText(status) {
     var map = {
-      pending: 'batchStatusPending',
-      running: 'batchStatusRunning',
-      done: 'batchStatusDone',
-      error: 'batchStatusError',
-      cancelled: 'batchStatusCancel'
+      pending: '等待中',
+      running: '处理中',
+      done: '已完成',
+      error: '失败',
+      cancelled: '已取消'
     };
-    return tr(map[status] || 'batchStatusPending');
+    return map[status] || '等待中';
   }
 
   function updateTaskNode(t) {
@@ -548,16 +507,16 @@
 
       var actions = '';
       if (t.status === 'done') {
-        actions += '<button class="batch-btn-mini" data-act="download">' + tr('batchActDownload') + '</button>';
+        actions += '<button class="batch-btn-mini" data-act="download">' + '下载' + '</button>';
         if (window.PrismDenArchive) {
-          actions += '<button class="batch-btn-mini" data-act="archive">' + tr('batchActArchive') + '</button>';
+          actions += '<button class="batch-btn-mini" data-act="archive">' + '存档案' + '</button>';
         }
       }
       if (t.status === 'error') {
-        actions += '<button class="batch-btn-mini" data-act="retry">' + tr('batchActRetry') + '</button>';
+        actions += '<button class="batch-btn-mini" data-act="retry">' + '重试' + '</button>';
       }
       if (t.status !== 'running') {
-        actions += '<button class="batch-btn-mini danger" data-act="remove">' + tr('batchActRemove') + '</button>';
+        actions += '<button class="batch-btn-mini danger" data-act="remove">' + '移除' + '</button>';
       }
 
       card.innerHTML =
@@ -568,7 +527,7 @@
             '<span class="batch-task-status">' + statusText(t.status) +
               (t.status === 'running' && t.progress ? ' ' + t.progress + '%' : '') + '</span>' +
             '<span>' + fmtBytes(t.size) + '</span>' +
-            (t.width ? '<span>' + t.width + '×' + t.height + (t.scaled ? tr('batchScaledTag') : '') + '</span>' : '') +
+            (t.width ? '<span>' + t.width + '×' + t.height + (t.scaled ? '（已缩放）' : '') + '</span>' : '') +
             '<span class="batch-task-time">' + fmtTime(t.elapsed) + '</span>' +
             (t.note ? '<span>' + t.note + '</span>' : '') +
             (t.error ? '<span class="batch-task-err">' + t.error + '</span>' : '') +
@@ -607,11 +566,11 @@
     var pct = total ? Math.round(((done + err) / total) * 100) : 0;
 
     el.summary.innerHTML =
-      '<div class="batch-stat"><span class="batch-stat-num">' + total + '</span><span>' + tr('batchStatTotal') + '</span></div>' +
-      '<div class="batch-stat ok"><span class="batch-stat-num">' + done + '</span><span>' + tr('batchStatDone') + '</span></div>' +
-      '<div class="batch-stat err"><span class="batch-stat-num">' + err + '</span><span>' + tr('batchStatFailed') + '</span></div>' +
-      '<div class="batch-stat"><span class="batch-stat-num">' + pending + '</span><span>' + tr('batchStatPending') + '</span></div>' +
-      '<div class="batch-stat"><span class="batch-stat-num">' + pct + '%</span><span>' + tr('batchStatProgress') + '</span></div>';
+      '<div class="batch-stat"><span class="batch-stat-num">' + total + '</span><span>' + '总任务' + '</span></div>' +
+      '<div class="batch-stat ok"><span class="batch-stat-num">' + done + '</span><span>' + '已完成' + '</span></div>' +
+      '<div class="batch-stat err"><span class="batch-stat-num">' + err + '</span><span>' + '失败' + '</span></div>' +
+      '<div class="batch-stat"><span class="batch-stat-num">' + pending + '</span><span>' + '等待中' + '</span></div>' +
+      '<div class="batch-stat"><span class="batch-stat-num">' + pct + '%</span><span>' + '总进度' + '</span></div>';
 
     if (el.overallBar) el.overallBar.style.width = pct + '%';
   }
@@ -624,28 +583,24 @@
     if (el.btnStart) el.btnStart.disabled = running;
     if (el.btnPause) el.btnPause.disabled = !running;
     if (el.btnCancel) el.btnCancel.disabled = !running;
-    if (el.btnStart) el.btnStart.textContent = running ? tr('batchBtnRunning') : tr('batchBtnStart');
+    if (el.btnStart) el.btnStart.textContent = running ? '处理中…' : '开始处理';
   }
-
-  /* ────────── 打包下载 ────────── */
 
   function packAndDownload() {
     var done = tasks.filter(function (t) { return t.status === 'done' && t.blob; });
-    if (!done.length) { toast(tr('batchNoPack'), 'error'); return; }
-    toast(tr('batchPacking', { n: done.length }), 'info');
+    if (!done.length) { toast('没有已完成的结果可打包', 'error'); return; }
+    toast('正在打包 ' + done.length + ' 个结果…', 'info');
 
     buildZip(done.map(function (t) { return { name: t.outName, blob: t.blob }; }))
       .then(function (zip) {
         var stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
         downloadBlob(zip, 'PrismDen_批量结果_' + stamp + '.zip');
-        toast(tr('batchPackDone'), 'success');
+        toast('打包完成', 'success');
       })
       .catch(function (err) {
-        toast(tr('batchPackFail', { err: err.message || err }), 'error');
+        toast('打包失败：' + err.message || err, 'error');
       });
   }
-
-  /* ────────── 初始化 ────────── */
 
   function init() {
     el = {
@@ -684,7 +639,6 @@
       });
     }
 
-    // 拖拽导入
     ['dragenter', 'dragover'].forEach(function (ev) {
       el.zone.addEventListener(ev, function (e) {
         e.preventDefault(); e.stopPropagation();
@@ -707,10 +661,9 @@
     if (el.btnPack) el.btnPack.addEventListener('click', packAndDownload);
     if (el.btnClear) el.btnClear.addEventListener('click', function () {
       clearFinished();
-      toast(tr('batchCleaned'), 'info');
+      toast('已清理已完成的任务', 'info');
     });
 
-    // 参数联动显示
     if (el.sigmaS) el.sigmaS.addEventListener('input', function () {
       document.getElementById('batchSigmaSVal').textContent = el.sigmaS.value;
     });
@@ -728,7 +681,6 @@
     render();
     syncButtons();
 
-    // 语言切换后重渲染任务卡与统计（这些是 JS 动态生成的）
     (window._langChangeHooks = window._langChangeHooks || []).push(function () {
       render();
       syncButtons();
