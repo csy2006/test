@@ -45,7 +45,6 @@
 .mod-field label {
   font-size: 0.78rem;
   color: var(--stone, #8c7a68);
-  letter-spacing: 0.02em;
 }
 .mod-field input[type="range"] {
   width: 150px;
@@ -74,11 +73,6 @@
   color: var(--ink);
   font-size: 0.88rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-.mod-btn:hover:not(:disabled) {
-  border-color: var(--orange, #c4683a);
-  color: var(--orange, #c4683a);
 }
 .mod-btn:disabled {
   opacity: 0.45;
@@ -88,14 +82,6 @@
   background: var(--orange, #c4683a);
   border-color: var(--orange, #c4683a);
   color: #fff;
-}
-.mod-btn.primary:hover:not(:disabled) {
-  background: #b25c31;
-  color: #fff;
-}
-.mod-btn.danger:hover:not(:disabled) {
-  border-color: #c0392b;
-  color: #c0392b;
 }
 .mod-empty {
   text-align: center;
@@ -111,10 +97,8 @@
   cursor: pointer;
   color: var(--ink-faded);
   font-size: 0.92rem;
-  transition: all 0.2s ease;
   background: var(--warm-white, #fffaf5);
 }
-.batch-zone:hover,
 .batch-zone.drag-over {
   border-color: var(--orange, #c4683a);
   color: var(--orange, #c4683a);
@@ -130,8 +114,7 @@
 .batch-overall-fill {
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, var(--orange, #c4683a), #e8833a);
-  transition: width 0.3s ease;
+  background: var(--orange, #c4683a);
 }
 .batch-queue-info {
   min-height: 1.1rem;
@@ -189,7 +172,6 @@
   border-radius: 12px;
   border: 1px solid var(--orange-border, rgba(184, 168, 152, 0.22));
   background: var(--warm-white, #fffaf5);
-  transition: border-color 0.2s ease;
 }
 .batch-task.status-running {
   border-color: var(--orange, #c4683a);
@@ -252,7 +234,6 @@
   height: 100%;
   width: 0;
   background: var(--orange, #c4683a);
-  transition: width 0.25s ease;
 }
 .batch-task-actions {
   display: flex;
@@ -267,15 +248,6 @@
   background: transparent;
   color: var(--ink);
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-.batch-btn-mini:hover {
-  border-color: var(--orange, #c4683a);
-  color: var(--orange, #c4683a);
-}
-.batch-btn-mini.danger:hover {
-  border-color: #c0392b;
-  color: #c0392b;
 }
 .batch-radio {
   display: inline-flex;
@@ -292,9 +264,7 @@
   text-align: center;
   cursor: pointer;
   color: var(--ink-faded);
-  transition: all 0.2s ease;
 }
-.editor-zone:hover,
 .editor-zone.drag-over {
   border-color: var(--orange, #c4683a);
   color: var(--orange, #c4683a);
@@ -308,7 +278,7 @@
 .editor-stage {
   flex: 1 1 auto;
   min-width: 0;
-  background: repeating-conic-gradient(rgba(184, 168, 152, 0.12) 0% 25%, transparent 0% 50%) 50% / 18px 18px;
+  background: rgba(184, 168, 152, 0.08);
   border-radius: 12px;
   padding: 0.6rem;
   display: flex;
@@ -319,7 +289,6 @@
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   cursor: crosshair;
 }
 .editor-panel {
@@ -334,7 +303,6 @@
 }
 .editor-group-title {
   font-size: 0.76rem;
-  letter-spacing: 0.04em;
   color: var(--stone, #8c7a68);
   margin-bottom: 0.5rem;
 }
@@ -377,11 +345,6 @@
   background: transparent;
   color: var(--ink-faded);
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-.log-tab:hover {
-  border-color: var(--orange, #c4683a);
-  color: var(--orange, #c4683a);
 }
 .log-tab.active {
   background: var(--orange, #c4683a);
@@ -510,11 +473,6 @@
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-.log-del:hover {
-  border-color: #c0392b;
-  color: #c0392b;
 }
 
 @media (max-width: 900px) {
