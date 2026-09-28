@@ -11,25 +11,13 @@
   <meta name="x5-page-mode" content="app" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="renderer" content="webkit" />
-  <meta name="color-scheme" content="light dark" />
+  <meta name="color-scheme" content="light" />
   <title>PrismDen</title>
   <link rel="stylesheet" href="style.css" />
 
   <link rel="stylesheet" href="modules.css" />
   <link rel="stylesheet" href="archive.css" />
   <link rel="icon" href="./002.jpg" type="image/x-icon">
-  <script>
-    (function() {
-      if (localStorage.getItem('theme')) return;
-      var mq = '(prefers-color-scheme: dark)';
-      var prefersDark = false;
-      try { prefersDark = window.matchMedia(mq).matches; } catch(e) {}
-      if (prefersDark) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        sessionStorage.setItem('_themeAuto', '1');
-      }
-    })();
-  </script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700;800;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script src="exif.js"></script>
 </head>
@@ -88,11 +76,6 @@
         <p class="hero-subtitle"><span>Hash-Accelerated Bilateral Filtering<br>哈希加速双边滤波图像降噪项目</span></p>
         <div class="hero-actions">
           <button class="btn btn-hero-action" onclick="switchPage('upload')">即刻降噪</button>
-          <div class="theme-switcher" id="themeSwitcher">
-            <span class="theme-option active" data-theme-option="light" onclick="setTheme('light')">浅色</span>
-            <span class="theme-option" data-theme-option="dark" onclick="setTheme('dark')">深色</span>
-            <div class="theme-pill"></div>
-          </div>
         </div>
       </div>
     </div>

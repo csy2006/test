@@ -45,10 +45,6 @@
   color: #a33a2a;
 }
 
-[data-theme="dark"] .archive-danger {
-  color: #e08a7a;
-}
-
 .archive-toolbar {
   display: flex;
   align-items: center;
@@ -114,10 +110,6 @@
   box-shadow: 0 1px 6px rgba(0,0,0,0.08);
   transition: transform 0.25s ease, width 0.25s ease;
   pointer-events: none;
-}
-
-[data-theme="dark"] .archive-tab-pill {
-  background: rgba(255,255,255,0.08);
 }
 
 .archive-fav-toggle {
